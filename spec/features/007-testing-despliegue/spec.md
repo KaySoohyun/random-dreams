@@ -1,6 +1,6 @@
 # 007 · Testing y despliegue MVP
 
-**Estado:** implementado ✅ (deploy efectivo documentado, pendiente credenciales)
+**Estado:** implementado y **desplegado en producción** ✅ (https://app-random-dreams.vercel.app)
 
 ## Qué hace
 

@@ -11,5 +11,5 @@
 - [x] `.vercelignore` (sin `vercel.json`: Next 15 se auto-detecta).
 - [x] `docs/despliegue-mvp.md` (pasos verificables + env vars) y `docs/qa-checklist-mvp.md`.
 - [x] Correr `npm run lint`, `npm test`, `npm run build`, smoke (mock y **real**) y `npm run test:e2e` en verde.
-- [x] Deploy efectivo: **preparado** (CI + docs); el paso manual queda documentado en `docs/despliegue-mvp.md` (no hay credenciales Vercel en el entorno).
+- [x] Deploy efectivo: **realizado** — https://app-random-dreams.vercel.app (proyecto `kaysoohyuns-projects/app-random-dreams`); env vars de producción configuradas (9, incl. `INNGEST_EVENT_KEY`/`INNGEST_SIGNING_KEY`), build OK, `/api/inngest` autenticado (401 sin firma), verificado por HTTP.
 - [x] Mover 007 a "Hecho" en `roadmap.md`, entrada en `docs/CAMBIOS.md`, nota en `docs/CONVENCIONES.md`, `[x]` en `spec.md` y `tasks.md`.

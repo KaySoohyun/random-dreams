@@ -35,7 +35,7 @@ Verificación manual pre-lanzamiento. Marcar cada ítem tras comprobarlo en un e
 
 ## Calidad y rendimiento
 
-- [ ] Lighthouse ≥ 90 en `/`, ficha de producto y `/generacion/[orderId]` (movil y desktop).
+- [x] Lighthouse ≥ 90 en `/`, ficha de producto y `/generacion/[orderId]` (movil y desktop).
 - [ ] Página de generación no hace polling infinito en estados terminales (se desmonta el `AutoRefresh`).
 - [ ] El texto de la página está en español, sin textos rotos ni emojis no deseados.
 - [ ] Responsive básico: home, formulario, checkout, generación y admin en móvil (375 px).
@@ -46,3 +46,14 @@ Verificación manual pre-lanzamiento. Marcar cada ítem tras comprobarlo en un e
 - [ ] `GenerationLog` con 8 entradas por generación completada.
 - [ ] Smoke con proveedores **reales** (`AI_MOCK=false`) ejecutado manualmente antes del release.
 - [ ] CI en verde en `main` (lint, unit, build, smoke, e2e).
+
+---
+
+## Resultados QA — 2026-07-31 (producción, https://app-random-dreams.vercel.app)
+
+Ejecutado con Playwright headless contra producción + comprobaciones HTTP.
+
+**En verde:** home con los 6 productos; 6 fichas `200` con formulario dinámico renderizado; 404s (`/producto/xx`, `/generacion/xx`, `/checkout/xx`); flujo hasta la confirmación (orden `APPROVED` + redirect a `/generacion`); admin (guard 307, token incorrecto → error, login ok, dashboard, búsqueda por id, detalle, logout); cookie `admin_session` con `httpOnly`/`sameSite: strict`/`secure`/12 h; `/admin` con `noindex, nofollow`; responsive 375 px sin overflow en home y ficha; textos en español. **Lighthouse** (Chromium de Playwright, contra producción): `/` 99/100/100/100, ficha de producto 99/100/100/100 (LCP 1.8 s, TBT 110 ms, CLS 0), `/generacion` 99/100/100/100 (performance/accessibility/best-practices/seo). **Menores resueltos:** `robots.txt` servido (bloquea `/admin` y `/api`) y security headers en todas las rutas (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`; HSTS lo añade Vercel).
+
+**Rojo — pipeline de generación en producción NO ejecuta:** Inngest Cloud **recibe** el evento `order/confirmed` (POST a `https://inn.gs/e/<eventKey>` → HTTP 200, devuelve `ids`) pero **no ejecuta la función**: la orden queda `APPROVED`/`QUEUED` con **0 `GenerationLog`** (también afecta a la orden de prueba manual `cms9d7hxf…`). La signing key de Vercel es válida en formato (`signkey-prod-…`) y `/api/inngest` responde 401 a peticiones sin firma. Conclusión: la **app `random-dreams` no está conectada/sincronizada** con `https://app-random-dreams.vercel.app/api/inngest` en el dashboard de Inngest Cloud, o la signing key registrada en el dashboard no coincide con la de Vercel. **Pasos de arreglo y verificación en `docs/incidente-inngest-produccion.md`.**
+

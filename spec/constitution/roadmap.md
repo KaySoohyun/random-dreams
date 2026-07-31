@@ -11,17 +11,17 @@ Orden y estado de las features. Es la vista de "qué hay hecho, qué toca ahora 
 5. **004 · Pipeline de generación IA** — Orquestación Inngest v4 (`order/confirmed`): `GENERATE_TEXT` (Gemini compone texto y prompt de imagen) → `GENERATE_IMAGE` (FLUX.1-schnell vía HF) → `UPLOAD_RESULT` → `MARK_COMPLETED`, con reintentos (5), timeouts, estados `queued/processing/completed/error` y trazabilidad en `GenerationLog`. `AI_MOCK` para dev/CI. Spec: `features/004-pipeline-ia/`.
 6. **005 · Entrega de resultado** — `/generacion/[orderId]` con polling (`router.refresh()` cada 3 s), vista del resultado (texto + preview `next/image`) y descarga directa del `.txt` y la imagen vía `/api/resultado/[orderId]`; botón de reintento desde `ERROR` (resetea a `QUEUED` + `retryCount`). Spec: `features/005-entrega-resultado/`.
 7. **006 · Backend core** — Panel admin/soporte `/admin` con token (`ADMIN_TOKEN`): login con cookie de sesión firmada, dashboard con conteos, gestión de órdenes (listado/filtros/detalle) y trazabilidad `GenerationLog`, con reintento desde `ERROR`. Sin API REST (constitución). Spec: `features/006-backend-core/`.
-8. **007 · Testing y despliegue MVP** — E2E Playwright del flujo completo (storefront hasta descargas + panel admin + 404s) con Next dev + Inngest Dev Server y `AI_MOCK=true`; aserción no trivial en el smoke real; CI en GitHub Actions (lint/unit/build/smoke/e2e); `docs/despliegue-mvp.md` y `docs/qa-checklist-mvp.md`. Deploy efectivo preparado (sin credenciales Vercel en el entorno). Spec: `features/007-testing-despliegue/`.
+8. **007 · Testing y despliegue MVP** — E2E Playwright del flujo completo (storefront hasta descargas + panel admin + 404s) con Next dev + Inngest Dev Server y `AI_MOCK=true`; aserción no trivial en el smoke real; CI en GitHub Actions (lint/unit/build/smoke/e2e); `docs/despliegue-mvp.md` y `docs/qa-checklist-mvp.md`. **Desplegado en producción**: https://app-random-dreams.vercel.app, con **Inngest Cloud conectado** (`/api/inngest` autenticado). Spec: `features/007-testing-despliegue/`.
 
 ## Siguiente 🔜
 
-_(MVP completo — siguiente fase: **V1**.)_
+_(MVP completo y en producción. **008 · Autenticación y cuenta** fue cancelada por decisión del usuario (2026-07-31): no se implementa auth por ahora; el MVP sigue tal cual.)_
 
 ## Backlog / ideas 💡
 
 ### V1 (Fase 2)
 
-- **008 · Autenticación y cuenta** — Registro/login (email + OAuth opcional), recuperación de contraseña, perfil; `Order.userId` obligatorio.
+- ~~**008 · Autenticación y cuenta**~~ — Registro/login (email + OAuth opcional), recuperación de contraseña, perfil; `Order.userId` obligatorio. **Cancelada/diferida** por decisión del usuario (2026-07-31); spec borrador en `features/008-autenticacion-cuenta/`.
 - **009 · Storage en la nube** — Supabase Storage (tier gratuito), subida automática del resultado, nombrado por `usuario/orden`, política de retención (`StorageAsset.expiresAt`).
 - **010 · Historial de generaciones** — Panel de usuario con historial y redescarga de resultados previos.
 - **011 · Testing y despliegue V1** — Integración auth + storage + historial, regresión sobre MVP, feature flags.

@@ -2,6 +2,14 @@
 
 Pasos verificables para llevar **Random Dreams** a producción en **Vercel**. Ejecutar el **checklist QA** (`docs/qa-checklist-mvp.md`) antes de cada release.
 
+## Estado del despliegue
+
+- **URL de producción:** https://app-random-dreams.vercel.app (proyecto `kaysoohyuns-projects/app-random-dreams`, Vercel CLI `vercel deploy --prod`).
+- Desplegado el **2026-07-31** desde `main` (`502adfb`) con las env vars de la tabla de abajo.
+- **Inngest Cloud conectado (2026-07-31):** `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` configuradas en producción y redeseployado. `/api/inngest` responde **401** a peticiones sin firma (handshake correcto; antes 500 por falta de `INNGEST_SIGNING_KEY`). El pipeline de generación ya puede ejecutarse en producción; confirmar en el dashboard de Inngest que la app apunte a `https://app-random-dreams.vercel.app/api/inngest` y que el evento `order/confirmed` esté registrado.
+- Gotcha al setear env vars con `vercel env add` desde shell: los valores de `.env` local suelen ir **entre comillas dobles** (`KEY="valor"`); si se copian con `cut -d=` quedan con las comillas y Prisma no resuelve el host ("Can't reach database server at base"). Quitar las comillas (`v=${v%\"}; v=${v#\"}`) antes de `env add`.
+- El build de Vercel corre `next build --turbopack` y regenera el cliente Prisma automáticamente (auto-detección de Next); no hizo falta `vercel.json`.
+
 ## Prerrequisitos
 
 - Cuenta en **GitHub** (repo privado recomendado) y en **Vercel**.
@@ -27,6 +35,8 @@ git push -u origin main
 2. Framework preset: **Next.js** (auto-detectado; build `npm run build`, output `standalone` opcional).
 3. Definir las **variables de entorno** (ver abajo).
 4. Deploy.
+
+> En el deploy actual se usó `vercel link --yes` + `vercel env add <KEY> production` + `vercel deploy --prod --yes` (sin importar desde el dashboard). El proyecto quedó vinculado en `.vercel/project.json`.
 
 ### Variables de entorno
 
