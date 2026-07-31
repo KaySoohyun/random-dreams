@@ -1,0 +1,10 @@
+# Archivos y carpetas que no se despliegan en Vercel
+e2e/
+tests/
+scripts/
+prototype/
+docs/
+spec/
+node_modules
+.next
+.env*

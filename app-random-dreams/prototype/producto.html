@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Dreams — Souvenir de Vida Paralela</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="tailwind-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-surface text-ink min-h-screen flex flex-col">
+
+  <header class="border-b border-line">
+    <div class="container-x flex items-center justify-between h-16">
+      <a href="index.html" class="font-bold text-lg">Random<span class="text-primary"> Dreams</span></a>
+      <nav class="flex items-center gap-6">
+        <a href="index.html" class="nav-link text-ink">Catálogo</a>
+        <a href="#" class="nav-link">Cuenta</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <div class="container-x py-8">
+      <a href="index.html" class="text-sm text-muted hover:text-ink">&larr; Volver al catálogo</a>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-6 items-start">
+        <section>
+          <h1 class="text-2xl font-bold tracking-tight">Souvenir de Vida Paralela</h1>
+          <p class="text-muted mt-3 leading-relaxed">
+            Contanos sobre la vida que viviste y el momento en que todo podría haber cambiado.
+            Generaremos un relato en primera persona de tu otra vida, junto con un retrato de la
+            persona que habrías llegado a ser. Recibís texto (<code>.txt</code>) e imagen (<code>.png</code>).
+          </p>
+          <div class="mt-6 hidden lg:block">
+            <div class="h-72 bg-mist rounded-xl flex items-center justify-center text-muted text-sm">[ilustración del producto]</div>
+          </div>
+        </section>
+
+        <section class="border border-line rounded-xl p-6">
+          <h2 class="font-semibold mb-4">Tu vida original</h2>
+          <form action="checkout.html" class="space-y-4">
+            <div>
+              <label class="field-label" for="nombre">Nombre de la vida original *</label>
+              <input class="field-input" id="nombre" name="nombre" placeholder="Tu nombre" required />
+            </div>
+            <div>
+              <label class="field-label" for="quiebre">El punto de quiebre *</label>
+              <input class="field-input" id="quiebre" name="quiebre" placeholder="El momento en que todo cambió" required />
+            </div>
+            <div>
+              <label class="field-label" for="camino">El camino que no tomaste *</label>
+              <input class="field-input" id="camino" name="camino" placeholder="La otra puerta, el otro tren…" required />
+            </div>
+            <div>
+              <label class="field-label" for="anios">Años después de ese momento</label>
+              <input class="field-input" id="anios" name="anios" type="number" min="1" value="10" />
+            </div>
+            <div>
+              <label class="field-label" for="tono">Tono del relato</label>
+              <select class="field-input" id="tono" name="tono">
+                <option value="">Seleccioná…</option>
+                <option>Nostálgico</option>
+                <option>Melancólico</option>
+                <option>Esperanzador</option>
+                <option>Irónico</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="estilo">Estilo del retrato</label>
+              <select class="field-input" id="estilo" name="estilo">
+                <option value="">Seleccioná…</option>
+                <option>Acuarela</option>
+                <option>Óleo clásico</option>
+                <option>B/N documental</option>
+                <option>Ilustración editorial</option>
+              </select>
+            </div>
+            <p class="text-xs text-muted">* Campos obligatorios</p>
+            <button type="submit" class="btn btn-primary w-full py-2.5">Continuar</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-line mt-16">
+    <div class="container-x py-8 text-center text-sm text-muted">
+      Random Dreams · prototipo del módulo 0.3
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Dreams — Resultado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="tailwind-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-surface text-ink min-h-screen flex flex-col">
+
+  <header class="border-b border-line">
+    <div class="container-x flex items-center justify-between h-16">
+      <a href="index.html" class="font-bold text-lg">Random<span class="text-primary"> Dreams</span></a>
+      <nav class="flex items-center gap-6">
+        <a href="index.html" class="nav-link text-ink">Catálogo</a>
+        <a href="#" class="nav-link">Cuenta</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <div class="container-x py-10">
+      <h1 class="text-2xl font-bold tracking-tight">Tu Souvenir de Vida Paralela está listo</h1>
+      <p class="text-muted mt-2">Guardalo antes de irte: se conserva en tu cuenta (historial disponible en V1).</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8 items-start">
+        <figure class="border border-line rounded-xl overflow-hidden">
+          <div class="aspect-square bg-gradient-to-br from-primary-light to-mist flex items-center justify-center text-muted text-sm">
+            [resultado.png · 1024×1024]
+          </div>
+          <figcaption class="p-3 text-xs text-muted border-t border-line">resultado.png</figcaption>
+        </figure>
+
+        <div class="border border-line rounded-xl flex flex-col">
+          <div class="p-6 flex-1 max-h-[600px] overflow-y-auto leading-relaxed text-sm whitespace-pre-wrap">
+            <span class="text-muted text-xs block mb-4">resultado.txt</span>
+En otra vida, Martín sí subió al tren de las 18:12.
+Nunca supo que ese andén dividía su biografía en dos. En la plataforma, la lluvia de julio se llevó a la persona que esperaba para despedirlo, y con ella la certeza de quedarse.
+
+A diez años de distancia, la ciudad le devuelve la esquina de aquella despedida. Hay un café nuevo, un semáforo que ya no reconoce, y una versión de sí mismo que aprendió a decir adiós con la mano en alto y no con el corazón apretado.
+
+El retrato lo muestra de frente: el abrigo gris que nunca compró, la sonrisa que practicó para no llorar en los andenes, los años que no vivió pero que lo envejecieron igual. La acuarela lo pinta con la luz tibia de las 18:12, la hora exacta en que dejó de ser el mismo y empezó a ser posible.
+
+          </div>
+          <div class="border-t border-line p-4 flex flex-col sm:flex-row gap-3">
+            <button type="button" class="btn btn-outline flex-1 py-2">Descargar .txt</button>
+            <button type="button" class="btn btn-primary flex-1 py-2">Descargar .png</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <a href="index.html" class="btn btn-outline py-2 px-6">Crear otra realidad</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-line mt-16">
+    <div class="container-x py-8 text-center text-sm text-muted">
+      Random Dreams · prototipo del módulo 0.3
+    </div>
+  </footer>
+</body>
+</html>

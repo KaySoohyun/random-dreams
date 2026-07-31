@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Dreams — Generando</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="tailwind-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-surface text-ink min-h-screen flex flex-col">
+
+  <header class="border-b border-line">
+    <div class="container-x flex items-center justify-between h-16">
+      <a href="index.html" class="font-bold text-lg">Random<span class="text-primary"> Dreams</span></a>
+      <nav class="flex items-center gap-6">
+        <a href="index.html" class="nav-link text-ink">Catálogo</a>
+        <a href="#" class="nav-link">Cuenta</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <div class="container-x max-w-2xl py-10">
+      <a href="index.html" class="text-sm text-muted hover:text-ink">&larr; Volver al catálogo</a>
+      <h1 class="text-2xl font-bold tracking-tight mt-4">Creando tu Souvenir de Vida Paralela…</h1>
+
+      <div class="border border-line rounded-xl mt-6 divide-y divide-line text-sm">
+        <div class="flex items-center gap-3 p-4">
+          <span class="text-success font-semibold">&#10003;</span>
+          <span class="flex-1">Escribiendo tu historia</span>
+          <span class="text-success text-xs font-medium">Completado</span>
+        </div>
+        <div class="flex items-center gap-3 p-4">
+          <svg class="spin w-4 h-4 text-warning shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="4" />
+            <path d="M22 12a10 10 0 0 0-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+          </svg>
+          <span class="flex-1">Generando la imagen</span>
+          <span class="text-warning text-xs font-medium">En proceso</span>
+        </div>
+        <div class="flex items-center gap-3 p-4 text-muted">
+          <span class="w-4 h-4 rounded-full border border-line shrink-0" aria-hidden="true"></span>
+          <span class="flex-1">Guardando archivos</span>
+          <span class="text-xs">Pendiente</span>
+        </div>
+        <div class="flex items-center gap-3 p-4 text-muted">
+          <span class="w-4 h-4 rounded-full border border-line shrink-0" aria-hidden="true"></span>
+          <span class="flex-1">Finalizando</span>
+          <span class="text-xs">Pendiente</span>
+        </div>
+      </div>
+
+      <div class="mt-6 h-2 bg-mist rounded-full overflow-hidden">
+        <div class="relative h-full w-1/3 bg-primary bar-anim rounded-full" aria-hidden="true"></div>
+      </div>
+      <p class="text-xs text-muted mt-2" role="status">Esto suele tomar menos de un minuto. Esta página se actualiza sola.</p>
+
+      <div class="mt-6 border border-danger/30 bg-danger/5 rounded-xl p-4 text-sm text-danger hidden" id="errorBox">
+        <div class="flex items-center gap-2 font-medium"><span>&#9888;</span> No pudimos completar la generación.</div>
+        <button type="button" id="retryBtn" class="btn btn-outline mt-3 py-2 px-4 text-danger border-danger/40 hover:border-danger"
+          onclick="document.getElementById('errorBox').classList.add('hidden'); document.getElementById('successLink').classList.remove('hidden');">
+          Reintentar
+        </button>
+      </div>
+
+      <div id="successLink" class="hidden mt-6">
+        <a href="resultado.html" class="btn btn-primary w-full py-2.5">Ver mi resultado</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-line mt-16">
+    <div class="container-x py-8 text-center text-sm text-muted">
+      Random Dreams · prototipo del módulo 0.3
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Dreams — Confirmar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="tailwind-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-surface text-ink min-h-screen flex flex-col">
+
+  <header class="border-b border-line">
+    <div class="container-x flex items-center justify-between h-16">
+      <a href="index.html" class="font-bold text-lg">Random<span class="text-primary"> Dreams</span></a>
+      <nav class="flex items-center gap-6">
+        <a href="index.html" class="nav-link text-ink">Catálogo</a>
+        <a href="#" class="nav-link">Cuenta</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <div class="container-x max-w-2xl py-10">
+      <a href="producto.html" class="text-sm text-muted hover:text-ink">&larr; Volver</a>
+      <h1 class="text-2xl font-bold tracking-tight mt-4">Confirmar tu creación</h1>
+
+      <div class="border border-line rounded-xl p-6 mt-6 space-y-3">
+        <h2 class="font-semibold">Souvenir de Vida Paralela</h2>
+        <dl class="text-sm space-y-2">
+          <div class="flex gap-2"><dt class="text-muted shrink-0">Vida original:</dt><dd>Martín</dd></div>
+          <div class="flex gap-2"><dt class="text-muted shrink-0">Punto de quiebre:</dt><dd>No subirse al tren de las 18:12</dd></div>
+          <div class="flex gap-2"><dt class="text-muted shrink-0">Tono:</dt><dd>Nostálgico</dd></div>
+          <div class="flex gap-2"><dt class="text-muted shrink-0">Estilo:</dt><dd>Acuarela</dd></div>
+        </dl>
+        <p class="text-sm text-muted border-t border-line pt-3">
+          Entrega: texto <code>.txt</code> + imagen <code>.png</code> · generado en ~1 min · sin cargo.
+        </p>
+      </div>
+
+      <a href="generacion.html" class="btn btn-primary w-full py-2.5 mt-6">Confirmar y generar</a>
+    </div>
+  </main>
+
+  <footer class="border-t border-line mt-16">
+    <div class="container-x py-8 text-center text-sm text-muted">
+      Random Dreams · prototipo del módulo 0.3
+    </div>
+  </footer>
+</body>
+</html>

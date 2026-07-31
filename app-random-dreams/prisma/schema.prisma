@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AiResponseStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  ERROR
+}
+
+enum PipelineStep {
+  GENERATE_TEXT
+  GENERATE_IMAGE
+  UPLOAD_RESULT
+  MARK_COMPLETED
+}
+
+enum PipelineStepStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  tagline         String
+  description     String
+  formSchema      Json
+  aiTextTemplate  String
+  aiPromptTemplate String
+  imageUrl        String?
+  active          Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  orders Order[]
+  generatedResults GeneratedResult[]
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  productId     String
+  userId        String?
+  paymentStatus PaymentStatus @default(PENDING)
+  confirmedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  product        Product         @relation(fields: [productId], references: [id])
+  formSubmission FormSubmission?
+  generatedResult GeneratedResult?
+  generationLogs  GenerationLog[]
+
+  @@index([productId])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+model GenerationLog {
+  id         String            @id @default(cuid())
+  orderId    String
+  step       PipelineStep
+  status     PipelineStepStatus
+  payload    Json?
+  error      String?
+  durationMs Int?
+  createdAt  DateTime          @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId, createdAt])
+  @@index([step])
+}
+
+model GeneratedResult {
+  id               String          @id @default(cuid())
+  orderId          String          @unique
+  productId        String
+  aiRequestPayload Json
+  aiResponseStatus AiResponseStatus @default(QUEUED)
+  textFileName     String?
+  textContent      String?
+  textFileUrl      String?
+  imageFileName    String?
+  imageBytes       Bytes?
+  imageFileUrl     String?
+  error            String?
+  retryCount       Int             @default(0)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([aiResponseStatus])
+  @@index([productId])
+}
+
+model FormSubmission {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  formData  Json
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
