@@ -2,10 +2,7 @@ import { expect, it } from "vitest";
 import { prisma } from "@/lib/db/prisma";
 import { confirmOrder, createPendingOrder } from "@/lib/services/orders";
 import { getResultFile, retryGeneration } from "@/lib/services/generation";
-import { runGenerationPipeline, runImageGenerationInline } from "@/inngest/run-pipeline";
-
-const fakeRun: (id: string, fn: () => Promise<unknown>) => Promise<unknown> = async (_id, fn) =>
-  fn();
+import { runGenerationPipeline, runImageGenerationInline } from "@/trigger/pipeline";
 
 it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
   console.log(
@@ -34,7 +31,7 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
     expect(confirmed.transitioned).toBe(true);
 
     const before = await prisma.generationLog.count({ where: { orderId: order.id } });
-    await runGenerationPipeline(order.id, fakeRun);
+    await runGenerationPipeline(order.id);
 
     const result = await prisma.generatedResult.findUnique({ where: { orderId: order.id } });
     if (!result) throw new Error("No se creó GeneratedResult");

@@ -6,7 +6,7 @@ Pasos verificables para llevar **Random Dreams** a producción en **Vercel**. Ej
 
 - **URL de producción:** https://app-random-dreams.vercel.app (proyecto `kaysoohyuns-projects/app-random-dreams`, Vercel CLI `vercel deploy --prod`).
 - Desplegado el **2026-07-31** desde `main` (`502adfb`) con las env vars de la tabla de abajo.
-- **Inngest Cloud conectado (2026-07-31):** `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` configuradas en producción y redeseployado. `/api/inngest` responde **401** a peticiones sin firma (handshake correcto; antes 500 por falta de `INNGEST_SIGNING_KEY`). El pipeline de generación ya puede ejecutarse en producción; confirmar en el dashboard de Inngest que la app apunte a `https://app-random-dreams.vercel.app/api/inngest` y que el evento `order/confirmed` esté registrado.
+- **Migración Inngest → Trigger.dev (2026-08-01):** el pipeline de generación es ahora una **task de Trigger.dev** (`trigger/tasks.ts`, id `generate-text`). Las Server Actions encolan con `sendOrderConfirmed` y, si Trigger.dev no está configurado (sin `TRIGGER_SECRET_KEY`/`TRIGGER_API_URL`), caen al **fallback inline** (`runGenerationInline`) para no romper el flujo. El endpoint `/api/inngest` y el paquete `inngest` se eliminaron.
 - Gotcha al setear env vars con `vercel env add` desde shell: los valores de `.env` local suelen ir **entre comillas dobles** (`KEY="valor"`); si se copian con `cut -d=` quedan con las comillas y Prisma no resuelve el host ("Can't reach database server at base"). Quitar las comillas (`v=${v%\"}; v=${v#\"}`) antes de `env add`.
 - El build de Vercel corre `next build --turbopack` y regenera el cliente Prisma automáticamente (auto-detección de Next); no hizo falta `vercel.json`.
 
@@ -49,9 +49,10 @@ git push -u origin main
 | `HF_TOKEN` | token de Hugging Face | producción |
 | `AI_MOCK` | `false` | **imprescindible** en producción |
 | `ADMIN_TOKEN` | token fuerte del panel admin | generar con `openssl rand -base64 32` |
-| `INNGEST_DEV` | vacío/ausente | solo dev local |
-| `INNGEST_EVENT_KEY` | clave del evento `order/confirmed` de **Inngest Cloud** | para producción |
-| `INNGEST_SIGNING_KEY` | clave de firma de **Inngest Cloud** | para producción |
+| `TRIGGER_API_URL` | URL del endpoint de Trigger.dev Cloud | para producción |
+| `TRIGGER_SECRET_KEY` | clave de secreto de Trigger.dev Cloud | para producción |
+| `TRIGGER_PROJECT_ID` | id del proyecto Trigger.dev | para producción |
+| `TRIGGER_ENVIRONMENT_ID` | id del environment Trigger.dev | para producción |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | reservadas | se usan en 009 (Storage) |
 
 ## 3. Migraciones y seeds
@@ -66,12 +67,12 @@ npx prisma migrate deploy
 npm run seed
 ```
 
-## 4. Inngest Cloud (producción)
+## 4. Trigger.dev (producción)
 
-1. Crear app en **Inngest Cloud** (`https://app.inngest.com`) con el id `random-dreams`.
-2. Copiar `INNGEST_EVENT_KEY` e `INNGEST_SIGNING_KEY` → Vercel.
-3. El endpoint de serve es `/api/inngest`; en producción Inngest lo invoca directamente (no hace falta el Dev Server local).
-4. Monitorear colas/reintentos en el dashboard de Inngest.
+1. Crear proyecto en **Trigger.dev Cloud** (`https://trigger.dev`) y copiar `TRIGGER_API_URL`, `TRIGGER_SECRET_KEY`, `TRIGGER_PROJECT_ID` y `TRIGGER_ENVIRONMENT_ID` → Vercel.
+2. Reemplazar el id `proj_RANDOM_DREAMS` de `trigger.config.ts` por el id real del proyecto.
+3. Desplegar las tasks: `npx trigger.dev@latest deploy` (o conectar el GitHub App de Trigger.dev al repo).
+4. Si no hay credenciales configuradas, la app **no se rompe**: la generación se ejecuta en línea (fallback).
 
 ## 5. Verificación post-deploy
 
@@ -84,6 +85,6 @@ npm run seed
 
 ## CI/CD
 
-`.github/workflows/ci.yml` corre en cada PR/push a `main`: **lint**, **unit**, **build**, **smoke** (IA mock) y **e2e** (Playwright + Inngest Dev Server). Requiere los secrets de GitHub: `DATABASE_URL`, `DIRECT_URL`, `GEMINI_MODEL`, `ADMIN_TOKEN`.
+`.github/workflows/ci.yml` corre en cada PR/push a `main`: **lint**, **unit**, **build**, **smoke** (IA mock) y **e2e** (Playwright; sin Trigger.dev — el fallback inline cubre el flujo en CI). Requiere los secrets de GitHub: `DATABASE_URL`, `DIRECT_URL`, `GEMINI_MODEL`, `ADMIN_TOKEN`.
 
 > Nota: el E2E usa la misma BD de dev (limpia al final). Si se desea una BD aislada para CI, crear una instancia Supabase dedicada y apuntar `DATABASE_URL` del secret a ella.

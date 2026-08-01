@@ -2,6 +2,19 @@
 
 Registro de cambios relevantes. Último primero.
 
+## 2026-08-01 — Migración Inngest → Trigger.dev
+
+**Qué cambió:**
+
+- Se elimina **Inngest** (`inngest/`, `app/api/inngest/route.ts`, paquetes `inngest`/`inngest-cli`) y se sustituye por **Trigger.dev v4** (`@trigger.dev/sdk@^4.5.9`).
+- Nueva carpeta `trigger/`: `pipeline.ts` (lógica de generación reutilizable: `runGenerationPipeline`, `runGenerationInline`, `runImageGenerationInline`), `tasks.ts` (task `generate-text` con reintentos `maxAttempts: 5`), `events.ts` (`sendOrderConfirmed` = `tasks.trigger("generate-text", { orderId })`) y `trigger.config.ts`.
+- Las Server Actions (`features/checkout/actions.ts`, `features/result/actions.ts`, `features/admin/actions.ts`) encolan con `sendOrderConfirmed` y, si Trigger.dev no está configurado (la llamada falla), **caen al fallback inline** `runGenerationInline` → el flujo no se rompe.
+- `playwright.config.ts`: se quita el dev server de Inngest (el e2e usa el fallback inline). Script nuevo `npm run trigger:dev`.
+- `.env.example` y `docs/despliegue-mvp.md`: `INNGEST_*` reemplazadas por `TRIGGER_API_URL` / `TRIGGER_SECRET_KEY` / `TRIGGER_PROJECT_ID` / `TRIGGER_ENVIRONMENT_ID`.
+- Tests actualizados a `@/trigger/pipeline` y a la nueva lógica de encolado + fallback.
+
+**Pendiente:** crear el proyecto en Trigger.dev Cloud, configurar las env vars en Vercel, reemplazar `proj_RANDOM_DREAMS` en `trigger.config.ts` y desplegar las tasks.
+
 ## 2026-08-01 — Imagen opcional a demanda (2 pasos)
 
 **Qué cambió:**
