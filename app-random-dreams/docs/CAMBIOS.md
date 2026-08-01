@@ -71,3 +71,18 @@ Registro de cambios relevantes. Último primero.
 - **Retry unificado:** `maxAttempts: 5` ahora solo en `trigger.config.ts`; se quitó el override en `tasks.ts`.
 - **Cache-Control en `/api/resultado`:** `no-store` al descargar; `private, max-age=3600` en vista previa (el resultado es inmutable tras COMPLETED).
 - **Lint en 0 warnings:** `argsIgnorePattern: "^_"` en `eslint.config.mjs`, parámetros renombrados a `_`-prefixed y import redundante de `FormField` eliminado en `prisma/seed-data.ts`.
+
+## 2026-08-01 — Cobertura de tests ampliada (rama mejoras-codigo)
+
+**Qué cambió:** se agregaron tests para funcionalidades sin cubrir (unit, vitest). De 63 a **114 tests** (20 archivos).
+
+- `forms-actions.test.ts`: `createOrder` (producto inexistente, formSchema inválido, errores de validación, redirect al checkout).
+- `checkout-actions.test.ts`: `confirmOrderAction` (notFound, encola solo al transicionar).
+- `result-actions.test.ts`: `retryGenerationAction` y `generateImageAction` (éxito, error, errores no-Error).
+- `resultado-route.test.ts`: GET `/api/resultado/[orderId]` (400 formato inválido, 404, content-type, Content-Disposition, Cache-Control vista/descarga).
+- `huggingface.test.ts`: `HuggingFaceImageProvider.generate` (sin token, bytes binarios, respuesta JSON con/ sin imágenes, 429/5xx, 400, imagen vacía, fallo de descarga, timeout).
+- `gemini.test.ts`: `GeminiContentProvider.generate` (sin api key, interpolación, texto vacío, placeholder faltante).
+- `interpolate.test.ts`: `interpolateTemplate` (arrays, números, placeholder faltante).
+- `forms-types.test.ts`: `isFormSchema` (tipos soportados, campos vacíos, invalidaciones).
+- `admin-session.test.ts`: `getAdminSession` / `createAdminSessionValue` (token, cookie válida/vencida, nombre de cookie).
+- `orders-service.test.ts`: se agregó `getOrderGeneration`.

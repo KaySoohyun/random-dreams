@@ -12,7 +12,8 @@ import {
   confirmOrder,
   createPendingOrder,
   getCheckoutOrder,
-  getOrderById
+  getOrderById,
+  getOrderGeneration
 } from "@/lib/services/orders";
 
 const mockTransaction = vi.mocked(prisma.$transaction);
@@ -76,6 +77,17 @@ describe("orders service", () => {
     expect(prisma.order.findUnique).toHaveBeenCalledWith({
       where: { id: "ord_1" },
       include: { product: true, formSubmission: true }
+    });
+  });
+
+  it("devuelve la order con producto y generatedResult para la página de generación", async () => {
+    vi.mocked(prisma.order.findUnique).mockResolvedValue(orderWith("p1", "APPROVED") as never);
+
+    const order = await getOrderGeneration("ord_1");
+    expect(order).not.toBeNull();
+    expect(prisma.order.findUnique).toHaveBeenCalledWith({
+      where: { id: "ord_1" },
+      include: { product: true, generatedResult: true }
     });
   });
 
