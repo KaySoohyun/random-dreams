@@ -14,6 +14,7 @@ import {
   markCompleted,
   markError,
   retryGeneration,
+  saveImage,
   saveText,
   setProcessing
 } from "@/lib/services/generation";
@@ -42,6 +43,14 @@ describe("generation service", () => {
     const result = await setProcessing("ord_1");
     expect(result).toBeNull();
     expect(prisma.generatedResult.update).not.toHaveBeenCalled();
+  });
+
+  it("saveImage persiste la imagen y deriva la extensión de los bytes", async () => {
+    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
+    await saveImage("ord_1", new Uint8Array(png));
+    const data = vi.mocked(prisma.generatedResult.update).mock.calls[0][0].data;
+    expect(data.imageFileName).toBe("resultado.png");
+    expect(Array.from(data.imageBytes as Uint8Array)).toEqual([...png]);
   });
 
   it("saveText persiste solo el texto y limpia los campos de imagen", async () => {

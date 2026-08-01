@@ -2,6 +2,16 @@
 
 Registro de cambios relevantes. Último primero.
 
+## 2026-08-01 — Imagen opcional a demanda (2 pasos)
+
+**Qué cambió:**
+
+- La generación queda **en 2 pasos**: primero solo texto (síncrono al confirmar, igual que antes), y en la página de resultado el usuario puede elegir **"Generar imagen"** (`ImageGenerateForm` con `useActionState`).
+- Nueva acción `generateImageAction` en `features/result/actions.ts` → `runImageGenerationInline` en `inngest/run-pipeline.ts`: reinterpola `aiPromptTemplate` con el `formData` guardado, genera la imagen (Hugging Face) y la persiste con `saveImage` (nueva en `lib/services/generation.ts`). Los errores se loguean en `GenerationLog` (`GENERATE_IMAGE`) y se muestran junto al botón sin tocar el estado del texto.
+- La página de resultado muestra la imagen (y su descarga) **solo si ya fue generada**; mientras tanto ofrece el botón para generarla.
+
+**Nota:** la imagen se genera síncrona dentro del Server Action; con proveedor real puede demorar. Si en Vercel choca con el timeout del serverless, habrá que moverlo a background (Inngest).
+
 ## 2026-08-01 — Generación síncrona solo texto (temporal)
 
 **Motivo:** desbloquear el flujo real en producción mientras se resuelve el incidente de Inngest Cloud (ver `docs/incidente-inngest-produccion.md`).

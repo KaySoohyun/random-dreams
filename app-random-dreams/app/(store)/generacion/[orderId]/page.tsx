@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getOrderGeneration } from "@/lib/services/orders";
-import { retryGenerationAction } from "@/features/result/actions";
+import { generateImageAction, retryGenerationAction } from "@/features/result/actions";
 import { AutoRefresh } from "@/features/result/auto-refresh";
+import { ImageGenerateForm } from "@/features/result/image-generate-form";
 import { RetryForm } from "@/features/result/retry-form";
 
 export async function generateMetadata({
@@ -36,6 +38,7 @@ export default async function GenerationPage({
   const status = generatedResult.aiResponseStatus;
   const isTerminal = status === "COMPLETED" || status === "ERROR";
   const retryAction = retryGenerationAction.bind(null, orderId);
+  const imageAction = generateImageAction.bind(null, orderId);
 
   return (
     <div className="container-x max-w-2xl py-10">
@@ -68,6 +71,38 @@ export default async function GenerationPage({
                 Descargar texto (.txt)
               </a>
             </div>
+
+            {generatedResult.imageBytes ? (
+              <>
+                <div className="relative aspect-[4/3] rounded-lg border border-line overflow-hidden mt-6 bg-mist">
+                  <Image
+                    src={`/api/resultado/${orderId}?formato=imagen`}
+                    alt={`Imagen generada para ${order.product.name}`}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 672px) 100vw, 672px"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-3 mt-4">
+                  <a
+                    href={`/api/resultado/${orderId}?formato=imagen&descarga=1`}
+                    download
+                    className="btn btn-outline px-4 py-2.5"
+                  >
+                    Descargar imagen
+                  </a>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted mt-6">
+                  ¿Querés que además generemos una imagen para tu creación?
+                </p>
+                <div className="mt-4">
+                  <ImageGenerateForm action={imageAction} />
+                </div>
+              </>
+            )}
           </>
         ) : status === "ERROR" ? (
           <>

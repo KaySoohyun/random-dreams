@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db/prisma";
-import { detectImageFormat } from "@/lib/ai/image-format";
+import { detectImageFormat, imageFileNameFor } from "@/lib/ai/image-format";
 import type {
   PipelineStep,
   PipelineStepStatus,
@@ -34,6 +34,17 @@ export function saveText(orderId: string, text: string) {
       textFileName: "resultado.txt",
       imageFileName: null,
       imageBytes: null,
+      imageFileUrl: null
+    }
+  });
+}
+
+export function saveImage(orderId: string, imageBytes: Uint8Array) {
+  return prisma.generatedResult.update({
+    where: { orderId },
+    data: {
+      imageFileName: imageFileNameFor(imageBytes),
+      imageBytes: new Uint8Array(imageBytes),
       imageFileUrl: null
     }
   });

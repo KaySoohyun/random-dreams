@@ -69,7 +69,20 @@ test("flujo completo: catálogo → formulario → checkout → generación → 
   if (!textPath) throw new Error("No hay path para el .txt");
   expect(readFileSync(textPath, "utf8")).toContain("[mock]");
 
-  await expect(page.getByRole("link", { name: "Descargar imagen" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Generar imagen" })).toBeVisible();
+  await page.getByRole("button", { name: "Generar imagen" }).click();
+  await expect(page.getByAltText(/Imagen generada/)).toBeVisible({ timeout: 60_000 });
+
+  const [imageDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("link", { name: "Descargar imagen" }).click()
+  ]);
+  expect(imageDownload.suggestedFilename()).toBe("resultado.png");
+  const imagePath = await imageDownload.path();
+  if (!imagePath) throw new Error("No hay path para la imagen");
+  const imageBytes = readFileSync(imagePath);
+  expect(imageBytes.length).toBeGreaterThan(0);
+  expect(imageBytes.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
 });
 
 test("404 en producto inexistente", async ({ page }) => {

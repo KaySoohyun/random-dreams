@@ -1,7 +1,9 @@
 import { NonRetriableError } from "inngest";
 import { TransientAIError } from "@/lib/ai/types";
 import { markError } from "@/lib/services/generation";
-import { runGenerationPipeline, type StepRun } from "./run-pipeline";
+import { runGenerationPipeline, runImageGenerationInline, type StepRun } from "./run-pipeline";
+
+export { runImageGenerationInline };
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
