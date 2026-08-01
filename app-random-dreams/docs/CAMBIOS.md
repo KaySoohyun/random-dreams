@@ -86,3 +86,10 @@ Registro de cambios relevantes. Último primero.
 - `forms-types.test.ts`: `isFormSchema` (tipos soportados, campos vacíos, invalidaciones).
 - `admin-session.test.ts`: `getAdminSession` / `createAdminSessionValue` (token, cookie válida/vencida, nombre de cookie).
 - `orders-service.test.ts`: se agregó `getOrderGeneration`.
+
+## 2026-08-01 — Paleta "candy" en Tailwind (rama mejoras-ux-ui)
+
+**Qué cambió:**
+
+- Se agregó la paleta **"candy"** a `app/globals.css` dentro de `@theme` (Tailwind v4): `candy-pink`, `candy-rose`, `candy-coral`, `candy-lavender`, `candy-sky`, `candy-plum-dark`, `candy-plum-muted`, `candy-navy-dark`, `candy-charcoal`. Genera utilidades `bg-candy-*`, `text-candy-*`, `border-candy-*`.
+- `docs/colores.md` queda declarado como **fuente de verdad** de la paleta; se agregó la regla en `AGENTS.md` para no cambiar/renombrar/eliminar colores ni tokens sin preguntar antes al usuario.

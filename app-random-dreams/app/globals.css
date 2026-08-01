@@ -13,6 +13,17 @@
   --color-warning: #d97706;
   --color-danger: #dc2626;
 
+  /* Paleta "candy" (fuente de verdad: docs/colores.md — no cambiar sin preguntar) */
+  --color-candy-pink: #f8a8e8;
+  --color-candy-rose: #fe98d6;
+  --color-candy-coral: #ffa9bb;
+  --color-candy-lavender: #b8bafd;
+  --color-candy-sky: #aeddfa;
+  --color-candy-plum-dark: #2c1328;
+  --color-candy-plum-muted: #4a2e46;
+  --color-candy-navy-dark: #141c38;
+  --color-candy-charcoal: #1a1d20;
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
