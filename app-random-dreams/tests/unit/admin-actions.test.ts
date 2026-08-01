@@ -27,6 +27,7 @@ vi.mock("@/trigger/pipeline", () => ({
 }));
 
 vi.mock("@/trigger/events", () => ({
+  enqueueGeneration: vi.fn().mockResolvedValue(undefined),
   sendOrderConfirmed: vi.fn().mockResolvedValue(undefined)
 }));
 
@@ -38,8 +39,7 @@ import {
 import { ADMIN_SESSION_NAME } from "@/lib/admin/session";
 import { signSession } from "@/lib/admin/token";
 import { retryGeneration } from "@/lib/services/generation";
-import { runGenerationInline } from "@/trigger/pipeline";
-import { sendOrderConfirmed } from "@/trigger/events";
+import { enqueueGeneration } from "@/trigger/events";
 
 const SECRET = "tok-admin-test";
 
@@ -109,19 +109,17 @@ describe("admin actions", () => {
 
     expect(target).toBe("REDIRECT:/admin/ordenes/ord_1");
     expect(retryGeneration).toHaveBeenCalledWith("ord_1");
-    expect(sendOrderConfirmed).toHaveBeenCalledWith("ord_1");
-    expect(runGenerationInline).not.toHaveBeenCalled();
+    expect(enqueueGeneration).toHaveBeenCalledWith("ord_1");
   });
 
-  it("adminRetryOrderAction cae al modo inline si Trigger.dev falla", async () => {
+  it("adminRetryOrderAction no encola si no hay resultado para reintentar", async () => {
     getMock.mockReturnValue({ value: signSession(SECRET, 60_000) });
-    vi.mocked(retryGeneration).mockResolvedValue({ id: "r1" } as never);
-    vi.mocked(sendOrderConfirmed).mockRejectedValue(new Error("no config"));
+    vi.mocked(retryGeneration).mockResolvedValue(null);
 
     const target = await catchRedirect(() => adminRetryOrderAction("ord_1", new FormData()));
 
     expect(target).toBe("REDIRECT:/admin/ordenes/ord_1");
-    expect(runGenerationInline).toHaveBeenCalledWith("ord_1");
+    expect(enqueueGeneration).not.toHaveBeenCalled();
   });
 
   it("adminRetryOrderAction sin sesión no reintenta", async () => {

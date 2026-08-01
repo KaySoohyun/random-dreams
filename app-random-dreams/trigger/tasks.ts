@@ -1,14 +1,10 @@
 import { task } from "@trigger.dev/sdk";
+import { messageOf } from "@/lib/utils/message";
 import { markError } from "@/lib/services/generation";
 import { runGenerationPipeline } from "./pipeline";
 
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 export const generateDreamTask = task({
   id: "generate-dream",
-  retry: { maxAttempts: 5, minTimeoutInMs: 5_000 },
   run: async (payload: { orderId: string }) => {
     try {
       await runGenerationPipeline(payload.orderId);

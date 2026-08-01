@@ -59,3 +59,30 @@ Registro de cambios relevantes. Último primero.
 - Se observó el reintento automático funcionando: un `GENERATE_TEXT` falló por timeout de Gemini (504) y Trigger.dev reintentó hasta éxito.
 
 **Pendiente:** dejar documentado cómo desplegar tasks nuevas (`npx trigger.dev deploy`) y cómo configurar las env vars en el dashboard de Trigger.dev (ya están cargadas manualmente en prod y dev).
+
+## 2026-08-01 — Correcciones de calidad (rama mejoras-codigo)
+
+**Qué cambió:**
+
+- **Bug de imagen corregido (stale read):** `saveText` ya no borra la imagen; el pipeline lee el estado al inicio y `generateImageStep` solo regenera si no hay imagen. Antes, re-ejecutar el pipeline sobre un pedido con imagen la perdía.
+- **`enqueueGeneration` extraído:** el bloque `try { sendOrderConfirmed } catch { runGenerationInline }` estaba duplicado en las 3 Server Actions (checkout, result, admin); ahora vive en `trigger/events.ts`.
+- **`generateImageStep` reusa `runStep`:** elimina la duplicación del logging RUNNING/SUCCESS/FAILED.
+- **`messageOf` movido a `lib/utils/message.ts`** (compartido entre `pipeline.ts` y `tasks.ts`).
+- **Retry unificado:** `maxAttempts: 5` ahora solo en `trigger.config.ts`; se quitó el override en `tasks.ts`.
+- **Cache-Control en `/api/resultado`:** `no-store` al descargar; `private, max-age=3600` en vista previa (el resultado es inmutable tras COMPLETED).
+- **Lint en 0 warnings:** `argsIgnorePattern: "^_"` en `eslint.config.mjs`, parámetros renombrados a `_`-prefixed y import redundante de `FormField` eliminado en `prisma/seed-data.ts`.
+
+## 2026-08-01 — Cobertura de tests ampliada (rama mejoras-codigo)
+
+**Qué cambió:** se agregaron tests para funcionalidades sin cubrir (unit, vitest). De 63 a **114 tests** (20 archivos).
+
+- `forms-actions.test.ts`: `createOrder` (producto inexistente, formSchema inválido, errores de validación, redirect al checkout).
+- `checkout-actions.test.ts`: `confirmOrderAction` (notFound, encola solo al transicionar).
+- `result-actions.test.ts`: `retryGenerationAction` y `generateImageAction` (éxito, error, errores no-Error).
+- `resultado-route.test.ts`: GET `/api/resultado/[orderId]` (400 formato inválido, 404, content-type, Content-Disposition, Cache-Control vista/descarga).
+- `huggingface.test.ts`: `HuggingFaceImageProvider.generate` (sin token, bytes binarios, respuesta JSON con/ sin imágenes, 429/5xx, 400, imagen vacía, fallo de descarga, timeout).
+- `gemini.test.ts`: `GeminiContentProvider.generate` (sin api key, interpolación, texto vacío, placeholder faltante).
+- `interpolate.test.ts`: `interpolateTemplate` (arrays, números, placeholder faltante).
+- `forms-types.test.ts`: `isFormSchema` (tipos soportados, campos vacíos, invalidaciones).
+- `admin-session.test.ts`: `getAdminSession` / `createAdminSessionValue` (token, cookie válida/vencida, nombre de cookie).
+- `orders-service.test.ts`: se agregó `getOrderGeneration`.

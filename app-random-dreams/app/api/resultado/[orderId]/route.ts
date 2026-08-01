@@ -31,6 +31,9 @@ export async function GET(
   headers.set("Content-Type", file.contentType ?? "application/octet-stream");
   if (descarga) {
     headers.set("Content-Disposition", `attachment; filename="${file.fileName}"`);
+    headers.set("Cache-Control", "no-store");
+  } else {
+    headers.set("Cache-Control", "private, max-age=3600");
   }
 
   return new NextResponse(new Uint8Array(file.bytes), { headers });

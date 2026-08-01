@@ -53,14 +53,14 @@ describe("generation service", () => {
     expect(Array.from(data.imageBytes as Uint8Array)).toEqual([...png]);
   });
 
-  it("saveText persiste solo el texto y limpia los campos de imagen", async () => {
+  it("saveText persiste el texto y preserva la imagen existente", async () => {
     await saveText("ord_1", "hola");
     const data = vi.mocked(prisma.generatedResult.update).mock.calls[0][0].data;
     expect(data.textContent).toBe("hola");
     expect(data.textFileName).toBe("resultado.txt");
-    expect(data.imageFileName).toBeNull();
-    expect(data.imageBytes).toBeNull();
-    expect(data.imageFileUrl).toBeNull();
+    expect(data.imageFileName).toBeUndefined();
+    expect(data.imageBytes).toBeUndefined();
+    expect(data.imageFileUrl).toBeUndefined();
   });
 
   it("markCompleted y markError transicionan el estado", async () => {
