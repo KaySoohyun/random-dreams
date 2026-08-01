@@ -6,8 +6,8 @@ function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-export const generateTextTask = task({
-  id: "generate-text",
+export const generateDreamTask = task({
+  id: "generate-dream",
   retry: { maxAttempts: 5, minTimeoutInMs: 5_000 },
   run: async (payload: { orderId: string }) => {
     try {

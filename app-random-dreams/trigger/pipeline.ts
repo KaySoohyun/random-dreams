@@ -39,18 +39,31 @@ export async function runGenerationPipeline(orderId: string) {
 
   await setProcessing(orderId);
 
+  const formData = (order.formSubmission?.formData ?? {}) as Record<string, unknown>;
   const input: AIContentInput = {
     productId: order.product.id,
-    formData: (order.formSubmission?.formData ?? {}) as Record<string, unknown>,
+    formData,
     aiTextTemplate: order.product.aiTextTemplate,
     aiPromptTemplate: order.product.aiPromptTemplate
   };
-  const contentProvider = getContentProvider();
 
   const generated = await runStep(orderId, "GENERATE_TEXT", () =>
-    contentProvider.generate(input)
+    getContentProvider().generate(input)
   );
   await runStep(orderId, "UPLOAD_RESULT", () => saveText(orderId, generated.text));
+
+  try {
+    await generateImageStep(
+      orderId,
+      order.product.aiPromptTemplate,
+      formData,
+      Boolean(order.generatedResult.imageBytes)
+    );
+  } catch {
+    // La imagen falló pero el texto ya está listo: se mantiene COMPLETED y
+    // la página ofrece el botón para reintentar la imagen.
+  }
+
   await runStep(orderId, "MARK_COMPLETED", () => markCompleted(orderId));
 }
 
@@ -62,16 +75,15 @@ export async function runGenerationInline(orderId: string) {
   }
 }
 
-export async function runImageGenerationInline(orderId: string) {
-  const order = await getOrderForGeneration(orderId);
-  if (!order?.generatedResult) return;
-  if (order.generatedResult.imageBytes) return;
+async function generateImageStep(
+  orderId: string,
+  aiPromptTemplate: string,
+  formData: Record<string, unknown>,
+  hasImage: boolean
+): Promise<void> {
+  if (hasImage) return;
 
-  const imagePrompt = interpolateTemplate(
-    order.product.aiPromptTemplate,
-    (order.formSubmission?.formData ?? {}) as Record<string, unknown>
-  );
-
+  const imagePrompt = interpolateTemplate(aiPromptTemplate, formData);
   const imageProvider = getImageProvider();
   const start = Date.now();
   await logStep(orderId, "GENERATE_IMAGE", "RUNNING");
@@ -86,4 +98,16 @@ export async function runImageGenerationInline(orderId: string) {
     });
     throw error;
   }
+}
+
+export async function runImageGenerationInline(orderId: string) {
+  const order = await getOrderForGeneration(orderId);
+  if (!order?.generatedResult) return;
+
+  await generateImageStep(
+    orderId,
+    order.product.aiPromptTemplate,
+    (order.formSubmission?.formData ?? {}) as Record<string, unknown>,
+    Boolean(order.generatedResult.imageBytes)
+  );
 }

@@ -42,21 +42,53 @@ describe("runGenerationPipeline", () => {
     );
   });
 
-  it("ejecuta los 3 pasos y registra logs RUNNING/SUCCESS", async () => {
+  it("ejecuta los 4 pasos (texto + imagen) y registra logs RUNNING/SUCCESS", async () => {
     await runGenerationPipeline("ord_1");
 
     expect(generationService.getOrderForGeneration).toHaveBeenCalledWith("ord_1");
     expect(generationService.setProcessing).toHaveBeenCalledWith("ord_1");
     expect(aiFactory.getContentProvider).toHaveBeenCalledTimes(1);
+    expect(aiFactory.getImageProvider).toHaveBeenCalledTimes(1);
+    expect(aiFactory.getImageProvider().generate).toHaveBeenCalledWith("Retrato Martín");
     expect(generationService.saveText).toHaveBeenCalledWith("ord_1", "texto");
+    expect(generationService.saveImage).toHaveBeenCalledWith("ord_1", new Uint8Array([1, 2, 3]));
     expect(generationService.markCompleted).toHaveBeenCalledWith("ord_1");
 
     const logCalls = vi.mocked(generationService.logStep).mock.calls;
     const steps = logCalls.map((call) => `${call[1]}:${call[2]}`);
-    for (const step of ["GENERATE_TEXT", "UPLOAD_RESULT", "MARK_COMPLETED"]) {
+    for (const step of ["GENERATE_TEXT", "UPLOAD_RESULT", "GENERATE_IMAGE", "MARK_COMPLETED"]) {
       expect(steps).toContain(`${step}:RUNNING`);
       expect(steps).toContain(`${step}:SUCCESS`);
     }
+  });
+
+  it("no genera imagen si la imagen ya existe", async () => {
+    vi.mocked(generationService.getOrderForGeneration).mockResolvedValue({
+      id: "ord_1",
+      product: { id: "p1", aiTextTemplate: "Hola {nombre}", aiPromptTemplate: "Retrato {nombre}" },
+      formSubmission: { formData: { nombre: "Martín" } },
+      generatedResult: { aiResponseStatus: "QUEUED", imageBytes: new Uint8Array([1, 2, 3]) }
+    } as never);
+
+    await runGenerationPipeline("ord_1");
+
+    expect(aiFactory.getImageProvider).not.toHaveBeenCalled();
+    expect(generationService.saveImage).not.toHaveBeenCalled();
+    expect(generationService.markCompleted).toHaveBeenCalledWith("ord_1");
+  });
+
+  it("si la imagen falla, completa con el texto y loguea FAILED sin propagar", async () => {
+    vi.mocked(aiFactory.getImageProvider).mockReturnValue({
+      generate: vi.fn().mockRejectedValue(new Error("imagen boom"))
+    } as never);
+
+    await expect(runGenerationPipeline("ord_1")).resolves.toBeUndefined();
+
+    const logCalls = vi.mocked(generationService.logStep).mock.calls;
+    expect(
+      logCalls.some((call) => call[1] === "GENERATE_IMAGE" && call[2] === "FAILED")
+    ).toBe(true);
+    expect(generationService.markCompleted).toHaveBeenCalledWith("ord_1");
   });
 
   it("sale temprano si el resultado ya está COMPLETED", async () => {

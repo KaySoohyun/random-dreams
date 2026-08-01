@@ -58,7 +58,7 @@ test("flujo completo: catálogo → formulario → checkout → generación → 
 
   await expect(page.getByText("Completado")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByText(/\[mock\] Texto generado/)).toBeVisible();
-  await expect(page.getByAltText(/Imagen generada/)).toHaveCount(0);
+  await expect(page.getByAltText(/Imagen generada/)).toBeVisible();
 
   const [textDownload] = await Promise.all([
     page.waitForEvent("download"),
@@ -68,10 +68,6 @@ test("flujo completo: catálogo → formulario → checkout → generación → 
   const textPath = await textDownload.path();
   if (!textPath) throw new Error("No hay path para el .txt");
   expect(readFileSync(textPath, "utf8")).toContain("[mock]");
-
-  await expect(page.getByRole("button", { name: "Generar imagen" })).toBeVisible();
-  await page.getByRole("button", { name: "Generar imagen" }).click();
-  await expect(page.getByAltText(/Imagen generada/)).toBeVisible({ timeout: 60_000 });
 
   const [imageDownload] = await Promise.all([
     page.waitForEvent("download"),

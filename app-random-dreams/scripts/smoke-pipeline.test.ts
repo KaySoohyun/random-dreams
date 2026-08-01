@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 import { prisma } from "@/lib/db/prisma";
 import { confirmOrder, createPendingOrder } from "@/lib/services/orders";
 import { getResultFile, retryGeneration } from "@/lib/services/generation";
-import { runGenerationPipeline, runImageGenerationInline } from "@/trigger/pipeline";
+import { runGenerationPipeline } from "@/trigger/pipeline";
 
 it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
   console.log(
@@ -44,11 +44,18 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
       expect(result.textContent!.length).toBeGreaterThan(40);
     }
     expect(result.textFileName).toBe("resultado.txt");
-    expect(result.imageBytes).toBeNull();
     console.log("textContent:", result.textContent.slice(0, 120), "…");
 
+    expect(result.imageBytes?.length).toBeGreaterThan(0);
+    if (process.env.AI_MOCK === "true") {
+      expect(result.imageFileName).toBe("resultado.png");
+    } else {
+      expect(result.imageBytes!.length).toBeGreaterThan(1000);
+    }
+    console.log("imagen generada:", result.imageFileName, result.imageBytes?.length, "bytes");
+
     const after = await prisma.generationLog.count({ where: { orderId: order.id } });
-    expect(after - before).toBe(6);
+    expect(after - before).toBe(8);
 
     const textFile = await getResultFile(order.id, "texto");
     expect(textFile.found).toBe(true);
@@ -56,24 +63,10 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
     expect(textFile.contentType).toBe("text/plain; charset=utf-8");
     expect(textFile.bytes?.length).toBe(new TextEncoder().encode(result.textContent as string).length);
 
-    const imageFileBefore = await getResultFile(order.id, "imagen");
-    expect(imageFileBefore.found).toBe(false);
-    console.log("archivo texto:", textFile.fileName, "| imagen:", imageFileBefore.found);
-
-    await runImageGenerationInline(order.id);
-    const withImage = await prisma.generatedResult.findUnique({ where: { orderId: order.id } });
-    if (!withImage) throw new Error("No se encontró el resultado tras generar la imagen");
-    expect(withImage.imageBytes?.length).toBeGreaterThan(0);
-    if (process.env.AI_MOCK === "true") {
-      expect(withImage.imageFileName).toBe("resultado.png");
-    } else {
-      expect(withImage.imageBytes!.length).toBeGreaterThan(1000);
-    }
-
     const imageFile = await getResultFile(order.id, "imagen");
     expect(imageFile.found).toBe(true);
     expect(imageFile.contentType).toBe(process.env.AI_MOCK === "true" ? "image/png" : "image/jpeg");
-    console.log("imagen generada:", withImage.imageFileName, withImage.imageBytes?.length, "bytes");
+    console.log("archivo texto:", textFile.fileName, "| imagen:", imageFile.fileName);
 
     expect(await retryGeneration(order.id)).toBeNull();
   } finally {

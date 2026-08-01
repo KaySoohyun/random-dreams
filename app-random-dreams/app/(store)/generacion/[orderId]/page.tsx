@@ -119,7 +119,8 @@ export default async function GenerationPage({
         ) : (
           <>
             <p className="text-sm text-muted mt-5">
-              Estamos generando tu texto. Suele tardar unos segundos: no cierres esta página.
+              Estamos generando tu texto e imagen. Suele tardar unos segundos: no cierres esta
+              página.
             </p>
             <div className="mt-6 flex items-center gap-3">
               <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />

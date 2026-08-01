@@ -1,6 +1,6 @@
 import { tasks } from "@trigger.dev/sdk";
-import type { generateTextTask } from "./tasks";
+import type { generateDreamTask } from "./tasks";
 
 export async function sendOrderConfirmed(orderId: string) {
-  await tasks.trigger<typeof generateTextTask>("generate-text", { orderId });
+  await tasks.trigger<typeof generateDreamTask>("generate-dream", { orderId });
 }
