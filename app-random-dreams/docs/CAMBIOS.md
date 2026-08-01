@@ -41,3 +41,21 @@ Registro de cambios relevantes. Último primero.
 2. Que `features/checkout/actions.ts`, `features/result/actions.ts` y `features/admin/actions.ts` vuelvan a enviar `sendOrderConfirmed` en vez de `runGenerationInline`.
 3. Reagregar la vista y descarga de imagen en la página de generación.
 4. Actualizar tests (unit, smoke y e2e) que hoy asumen solo texto.
+
+## 2026-08-01 — Migración a Trigger.dev: texto + imagen en background (verificado en prod)
+
+**Qué cambió:**
+
+- **Inngest eliminado** (carpeta `inngest/`, `app/api/inngest/route.ts`); el pipeline asíncrono ahora vive en `trigger/` y se orquesta con **Trigger.dev Cloud** (proyecto `proj_nklaujzeaipgfjurhwqa`, env `prod`/`dev`).
+- Task `generate-dream` (`trigger/tasks.ts`, retry maxAttempts 5): `runGenerationPipeline` corre **GENERATE_TEXT (Gemini) → UPLOAD_RESULT → GENERATE_IMAGE (Hugging Face) → MARK_COMPLETED**. Si la imagen falla, no rompe el pedido (queda COMPLETED con el texto y la página ofrece reintentar la imagen).
+- Las Server Actions (`checkout`, `result`, `admin`) encolan con `sendOrderConfirmed` → `tasks.trigger("generate-dream", { orderId })`, con fallback inline si Trigger.dev no está configurado.
+- UI de `/generacion/[orderId]` actualizada a "tu texto e imagen".
+- `trigger.config.ts`: `project: "proj_nklaujzeaipgfjurhwqa"`, `dirs: ["./trigger"]`, `maxDuration: 3600`, retries globales. CLI `trigger.dev@^4.5.9` en devDependencies; script `npm run trigger:dev`.
+
+**Verificado en producción (2026-08-01):**
+
+- Deploy de la task `generate-dream` (v20260801.2) y de la app en Vercel (`npx vercel --prod`).
+- Pedido real creado en la BD prod y task disparada vía MCP en env `prod` → run `run_06frrg7m6kikhjre3oam7n8f01` **completed** en ~1 minuto: texto de 4740 caracteres (`resultado.txt`) e imagen de 291 KB (`resultado.jpg`) persistidos, status `COMPLETED`, `paymentStatus APPROVED`.
+- Se observó el reintento automático funcionando: un `GENERATE_TEXT` falló por timeout de Gemini (504) y Trigger.dev reintentó hasta éxito.
+
+**Pendiente:** dejar documentado cómo desplegar tasks nuevas (`npx trigger.dev deploy`) y cómo configurar las env vars en el dashboard de Trigger.dev (ya están cargadas manualmente en prod y dev).
