@@ -62,6 +62,7 @@ app-random-dreams/
 - Seguir `docs/CONVENCIONES.md` y la `spec/constitution/` (tech-stack) para reglas detalladas.
 - Documentar cambios en `docs/CAMBIOS.md`.
 - Regla de capas: rutas/Server Actions delegan en `lib/services`; el dominio no importa de `next/*`.
+- **Colores:** la paleta "candy" (y los design tokens de `app/globals.css` → `@theme`) tienen como **fuente de verdad `docs/colores.md`**. No cambiar, renombrar ni eliminar ningún color ni token sin preguntar antes al usuario.
 
 ## No hagas
 

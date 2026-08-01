@@ -13,6 +13,17 @@
   --color-warning: #d97706;
   --color-danger: #dc2626;
 
+  /* Paleta "candy" (fuente de verdad: docs/colores.md — no cambiar sin preguntar) */
+  --color-candy-pink: #f8a8e8;
+  --color-candy-rose: #fe98d6;
+  --color-candy-coral: #ffa9bb;
+  --color-candy-lavender: #b8bafd;
+  --color-candy-sky: #aeddfa;
+  --color-candy-plum-dark: #2c1328;
+  --color-candy-plum-muted: #4a2e46;
+  --color-candy-navy-dark: #141c38;
+  --color-candy-charcoal: #1a1d20;
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -37,6 +48,25 @@
   }
   .field-input {
     @apply w-full h-10 px-3 rounded-[10px] border border-line bg-surface text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light;
+  }
+  .btn-gradient-candy {
+    background: linear-gradient(135deg,
+      var(--color-candy-pink) 0%,
+      var(--color-candy-rose) 25%,
+      var(--color-candy-coral) 50%,
+      var(--color-candy-lavender) 75%,
+      var(--color-candy-sky) 100%);
+    background-size: 300% 300%;
+    background-position: 0% 50%;
+    transition: all 0.5s ease-in-out;
+  }
+  .btn-gradient-candy:hover {
+    background-position: 100% 50%;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(248, 168, 232, 0.4), 0 8px 10px -6px rgba(184, 186, 253, 0.3);
+  }
+  .btn-gradient-candy:active {
+    transform: translateY(0);
   }
 }
 

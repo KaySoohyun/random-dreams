@@ -86,3 +86,18 @@ Registro de cambios relevantes. Último primero.
 - `forms-types.test.ts`: `isFormSchema` (tipos soportados, campos vacíos, invalidaciones).
 - `admin-session.test.ts`: `getAdminSession` / `createAdminSessionValue` (token, cookie válida/vencida, nombre de cookie).
 - `orders-service.test.ts`: se agregó `getOrderGeneration`.
+
+## 2026-08-01 — Paleta "candy" en Tailwind (rama mejoras-ux-ui)
+
+**Qué cambió:**
+
+- Se agregó la paleta **"candy"** a `app/globals.css` dentro de `@theme` (Tailwind v4): `candy-pink`, `candy-rose`, `candy-coral`, `candy-lavender`, `candy-sky`, `candy-plum-dark`, `candy-plum-muted`, `candy-navy-dark`, `candy-charcoal`. Genera utilidades `bg-candy-*`, `text-candy-*`, `border-candy-*`.
+- `docs/colores.md` queda declarado como **fuente de verdad** de la paleta; se agregó la regla en `AGENTS.md` para no cambiar/renombrar/eliminar colores ni tokens sin preguntar antes al usuario.
+
+## 2026-08-01 — ProductCard estilo "Cotton Candy Sky" (rama mejoras-ux-ui)
+
+**Qué cambió:**
+
+- `features/catalog/product-card.tsx` rediseñado según `docs/componentes.md`: card glassy (`bg-white/80 backdrop-blur-md`, `rounded-3xl`, `shadow-xl`, borde `candy-lavender/40`), imagen al **75%** con zoom suave al hover, contenido al **25%**, título `candy-plum-dark` y subtítulo `candy-plum-muted`, y **botón "Crear" con gradiente candy animado** (`.btn-gradient-candy` nuevo en `app/globals.css`).
+- Solo usa tokens de la paleta candy (`docs/colores.md`); no se tocaron los colores.
+- Test existente de `ProductCard` sigue pasando (2/2).
