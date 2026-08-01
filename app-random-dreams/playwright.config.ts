@@ -23,12 +23,6 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: [
     {
-      command: "npx inngest-cli dev -u http://localhost:3000/api/inngest --no-discovery --port 8288",
-      url: "http://127.0.0.1:8288/dev",
-      reuseExistingServer: !isCI,
-      timeout: 60_000
-    },
-    {
       command: "npm run dev",
       url: "http://localhost:3000",
       reuseExistingServer: !isCI,

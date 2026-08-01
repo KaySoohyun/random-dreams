@@ -67,7 +67,6 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_URL }}
       AI_MOCK: "true"
-      INNGEST_DEV: "true"
       GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
       ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
     steps:

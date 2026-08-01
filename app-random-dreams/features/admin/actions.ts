@@ -10,7 +10,8 @@ import {
 } from "@/lib/admin/session";
 import { verifyAdminToken } from "@/lib/admin/token";
 import { retryGeneration } from "@/lib/services/generation";
-import { runGenerationInline } from "@/inngest/run-with-errors";
+import { runGenerationInline } from "@/trigger/pipeline";
+import { sendOrderConfirmed } from "@/trigger/events";
 
 async function requireAdminSession() {
   if (!(await getAdminSession())) redirect("/admin/login");
@@ -49,7 +50,12 @@ export async function adminRetryOrderAction(orderId: string, _formData: FormData
 
   const result = await retryGeneration(orderId);
   if (result) {
-    await runGenerationInline(orderId);
+    try {
+      await sendOrderConfirmed(orderId);
+    } catch (error) {
+      console.warn("No se pudo encolar en Trigger.dev; se genera en línea:", error);
+      await runGenerationInline(orderId);
+    }
   }
 
   redirect(`/admin/ordenes/${orderId}`);

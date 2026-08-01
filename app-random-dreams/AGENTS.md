@@ -1,6 +1,6 @@
 # AGENTS.md — Random Dreams
 
-Plataforma donde el usuario elige entre **6 productos**, completa un **formulario dinámico** configurable por producto, confirma el pedido y una **API de IA** genera un resultado (texto + imagen) descargable. La generación es **asíncrona** (Inngest). No hay pasarela de pago: el checkout es una confirmación simulada.
+Plataforma donde el usuario elige entre **6 productos**, completa un **formulario dinámico** configurable por producto, confirma el pedido y una **API de IA** genera un resultado (texto + imagen) descargable. La generación es **asíncrona** (Trigger.dev; con fallback inline si no está configurado). No hay pasarela de pago: el checkout es una confirmación simulada.
 
 ## Stack
 
@@ -9,7 +9,7 @@ Plataforma donde el usuario elige entre **6 productos**, completa un **formulari
 - **Tailwind CSS** + design tokens
 - **Google Gemini** (`@google/genai`) — texto / prompts (AIContentProvider)
 - **Hugging Face Inference API** — imágenes (AIImageProvider)
-- **Inngest** — orquestación asíncrona (colas, reintentos, timeouts)
+- **Trigger.dev** — orquestación asíncrona (tasks, reintentos, timeouts); fallback inline si no hay credenciales
 - **Auth.js (NextAuth)** — V1 (email + OAuth opcional)
 - **Zod** — validación de formularios dinámicos
 - **Vitest** + **Playwright** — tests
@@ -39,12 +39,12 @@ app-random-dreams/
 │   ├── (auth)/             # login/registro (V1)
 │   ├── cuenta/             # historial / redescarga (V1)
 │   ├── admin/              # gestión de productos/formularios (V2)
-│   └── api/                # route handlers (webhook Inngest, storage)
+│   └── api/                # route handlers (storage)
 ├── components/             # UI (design system) y features
 ├── features/               # módulos por dominio (catalog, forms, orders…)
 ├── lib/                    # db, auth, servicios de dominio
 │   └── ai/                 # proveedores de IA (AIContentProvider, AIImageProvider) + interfaces
-├── inngest/                # funciones de background (pipeline de generación)
+├── trigger/                # tasks de background (pipeline de generación) + pipeline reutilizable
 ├── prisma/                 # schema.prisma + migraciones + seeds
 ├── public/                 # estáticos
 ├── tests/                  # e2e (Playwright)
@@ -70,7 +70,7 @@ app-random-dreams/
 - No exponer claves (Gemini, Hugging Face, Supabase) ni subir `.env*`.
 - No acoplar la lógica de generación a un proveedor de IA concreto.
 - No llamadas reales a Gemini/Hugging Face en CI (usar mocks).
-- No integrar la generación IA de forma síncrona en el request (siempre por Inngest).
+- No integrar la generación IA de forma síncrona en el request (encolar en Trigger.dev; solo fallback inline si no está configurado).
 
 ## Flujo de trabajo
 
@@ -86,5 +86,5 @@ app-random-dreams/
 - **Entorno:** Next.js full-stack (App Router), Server Components + Server Actions; Route Handlers solo para integraciones externas.
 - **Sin pasarela de pago:** `Order.paymentStatus` transiciona `pending → approved` en la confirmación simulada; modelado para integración futura.
 - **Catálogo data-driven:** 6 productos definidos por `Product.formSchema` (JSON) y las plantillas `Product.aiTextTemplate` + `Product.aiPromptTemplate`.
-- **Generación asíncrona:** pipeline Inngest `composePrompt (Gemini) → generateImage (HF) → uploadResult → markCompleted`; estados `queued / processing / completed / error` con polling del frontend; trazabilidad en `GenerationLog`.
+- **Generación asíncrona:** task Trigger.dev `generate-text` → `runGenerationPipeline` (`GENERATE_TEXT (Gemini) → UPLOAD_RESULT → MARK_COMPLETED`); la imagen se genera a demanda en `runImageGenerationInline`; estados `queued / processing / completed / error` con polling del frontend; trazabilidad en `GenerationLog`. Las Server Actions encolan con `sendOrderConfirmed` y, si Trigger.dev no está configurado, caen a `runGenerationInline`.
 - **Alcance:** MVP (catálogo, formulario, checkout, generación, resultado), V1 (auth, storage en nube, historial), V2 (optimización, seguridad, analítica, extensibilidad).
