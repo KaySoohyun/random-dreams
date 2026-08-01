@@ -2,16 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { retryGeneration } from "@/lib/services/generation";
-import { sendOrderConfirmed } from "@/inngest/events";
+import { runGenerationInline } from "@/inngest/run-with-errors";
 
 export async function retryGenerationAction(orderId: string, _formData: FormData) {
   const result = await retryGeneration(orderId);
   if (result) {
-    try {
-      await sendOrderConfirmed(orderId);
-    } catch (error) {
-      console.warn("No se pudo enviar el evento order/confirmed al reintentar:", error);
-    }
+    await runGenerationInline(orderId);
   }
 
   redirect(`/generacion/${orderId}`);

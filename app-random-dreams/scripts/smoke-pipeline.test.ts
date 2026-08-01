@@ -41,21 +41,17 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
 
     expect(result.aiResponseStatus).toBe("COMPLETED");
     expect(result.textContent).toBeTruthy();
-    expect(result.imageBytes?.length).toBeGreaterThan(0);
     if (process.env.AI_MOCK === "true") {
       expect(result.textContent).toContain("[mock]");
     } else {
       expect(result.textContent!.length).toBeGreaterThan(40);
-      expect(result.imageBytes!.length).toBeGreaterThan(1000);
     }
     expect(result.textFileName).toBe("resultado.txt");
-    const expectedExt = process.env.AI_MOCK === "true" ? "png" : "jpg";
-    expect(result.imageFileName).toBe(`resultado.${expectedExt}`);
+    expect(result.imageBytes).toBeNull();
     console.log("textContent:", result.textContent.slice(0, 120), "…");
-    console.log("imageBytes:", result.imageBytes?.length, "bytes");
 
     const after = await prisma.generationLog.count({ where: { orderId: order.id } });
-    expect(after - before).toBe(8);
+    expect(after - before).toBe(6);
 
     const textFile = await getResultFile(order.id, "texto");
     expect(textFile.found).toBe(true);
@@ -64,10 +60,8 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
     expect(textFile.bytes?.length).toBe(new TextEncoder().encode(result.textContent as string).length);
 
     const imageFile = await getResultFile(order.id, "imagen");
-    expect(imageFile.found).toBe(true);
-    expect(imageFile.contentType).toBe(process.env.AI_MOCK === "true" ? "image/png" : "image/jpeg");
-    expect(imageFile.bytes?.length).toBe(result.imageBytes?.length);
-    console.log("archivo texto:", textFile.fileName, "| imagen:", imageFile.fileName);
+    expect(imageFile.found).toBe(false);
+    console.log("archivo texto:", textFile.fileName, "| imagen:", imageFile.found);
 
     expect(await retryGeneration(order.id)).toBeNull();
   } finally {

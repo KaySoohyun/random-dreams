@@ -22,8 +22,8 @@ vi.mock("@/lib/services/generation", () => ({
   retryGeneration: vi.fn()
 }));
 
-vi.mock("@/inngest/events", () => ({
-  sendOrderConfirmed: vi.fn()
+vi.mock("@/inngest/run-with-errors", () => ({
+  runGenerationInline: vi.fn()
 }));
 
 import {
@@ -34,7 +34,7 @@ import {
 import { ADMIN_SESSION_NAME } from "@/lib/admin/session";
 import { signSession } from "@/lib/admin/token";
 import { retryGeneration } from "@/lib/services/generation";
-import { sendOrderConfirmed } from "@/inngest/events";
+import { runGenerationInline } from "@/inngest/run-with-errors";
 
 const SECRET = "tok-admin-test";
 
@@ -96,16 +96,16 @@ describe("admin actions", () => {
     expect(deleteMock).not.toHaveBeenCalled();
   });
 
-  it("adminRetryOrderAction reintenta (retryGeneration + evento) y redirige al detalle", async () => {
+  it("adminRetryOrderAction reintenta (retryGeneration + generación inline) y redirige al detalle", async () => {
     getMock.mockReturnValue({ value: signSession(SECRET, 60_000) });
     vi.mocked(retryGeneration).mockResolvedValue({ id: "r1" } as never);
-    vi.mocked(sendOrderConfirmed).mockResolvedValue(undefined);
+    vi.mocked(runGenerationInline).mockResolvedValue(undefined);
 
     const target = await catchRedirect(() => adminRetryOrderAction("ord_1", new FormData()));
 
     expect(target).toBe("REDIRECT:/admin/ordenes/ord_1");
     expect(retryGeneration).toHaveBeenCalledWith("ord_1");
-    expect(sendOrderConfirmed).toHaveBeenCalledWith("ord_1");
+    expect(runGenerationInline).toHaveBeenCalledWith("ord_1");
   });
 
   it("adminRetryOrderAction sin sesión no reintenta", async () => {

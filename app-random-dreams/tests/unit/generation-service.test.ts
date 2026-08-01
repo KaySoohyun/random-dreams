@@ -14,7 +14,7 @@ import {
   markCompleted,
   markError,
   retryGeneration,
-  saveTextAndImage,
+  saveText,
   setProcessing
 } from "@/lib/services/generation";
 
@@ -44,19 +44,14 @@ describe("generation service", () => {
     expect(prisma.generatedResult.update).not.toHaveBeenCalled();
   });
 
-  it("saveTextAndImage persiste texto e imagen y deriva la extensión de los bytes", async () => {
-    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
-    await saveTextAndImage("ord_1", "hola", png);
+  it("saveText persiste solo el texto y limpia los campos de imagen", async () => {
+    await saveText("ord_1", "hola");
     const data = vi.mocked(prisma.generatedResult.update).mock.calls[0][0].data;
     expect(data.textContent).toBe("hola");
     expect(data.textFileName).toBe("resultado.txt");
-    expect(data.imageFileName).toBe("resultado.png");
-    expect(Array.from(data.imageBytes as Uint8Array)).toEqual([...png]);
-
-    const jpg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00]);
-    await saveTextAndImage("ord_1", "hola", jpg);
-    const dataJpg = vi.mocked(prisma.generatedResult.update).mock.calls[1][0].data;
-    expect(dataJpg.imageFileName).toBe("resultado.jpg");
+    expect(data.imageFileName).toBeNull();
+    expect(data.imageBytes).toBeNull();
+    expect(data.imageFileUrl).toBeNull();
   });
 
   it("markCompleted y markError transicionan el estado", async () => {

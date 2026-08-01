@@ -10,7 +10,7 @@ import {
 } from "@/lib/admin/session";
 import { verifyAdminToken } from "@/lib/admin/token";
 import { retryGeneration } from "@/lib/services/generation";
-import { sendOrderConfirmed } from "@/inngest/events";
+import { runGenerationInline } from "@/inngest/run-with-errors";
 
 async function requireAdminSession() {
   if (!(await getAdminSession())) redirect("/admin/login");
@@ -49,11 +49,7 @@ export async function adminRetryOrderAction(orderId: string, _formData: FormData
 
   const result = await retryGeneration(orderId);
   if (result) {
-    try {
-      await sendOrderConfirmed(orderId);
-    } catch (error) {
-      console.warn("No se pudo enviar el evento order/confirmed desde el panel admin:", error);
-    }
+    await runGenerationInline(orderId);
   }
 
   redirect(`/admin/ordenes/${orderId}`);

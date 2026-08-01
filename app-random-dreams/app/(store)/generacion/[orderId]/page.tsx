@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getOrderGeneration } from "@/lib/services/orders";
 import { retryGenerationAction } from "@/features/result/actions";
@@ -60,20 +59,6 @@ export default async function GenerationPage({
               {generatedResult.textContent}
             </div>
 
-            {generatedResult.imageBytes ? (
-              <div className="relative aspect-[4/3] rounded-lg border border-line overflow-hidden mt-6 bg-mist">
-                <Image
-                  src={`/api/resultado/${orderId}?formato=imagen`}
-                  alt={`Imagen generada para ${order.product.name}`}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 672px) 100vw, 672px"
-                />
-              </div>
-            ) : (
-              <p className="text-sm text-muted mt-6">Imagen no disponible.</p>
-            )}
-
             <div className="flex flex-wrap gap-3 mt-6">
               <a
                 href={`/api/resultado/${orderId}?formato=texto&descarga=1`}
@@ -81,13 +66,6 @@ export default async function GenerationPage({
                 className="btn btn-primary px-4 py-2.5"
               >
                 Descargar texto (.txt)
-              </a>
-              <a
-                href={`/api/resultado/${orderId}?formato=imagen&descarga=1`}
-                download
-                className="btn btn-outline px-4 py-2.5"
-              >
-                Descargar imagen
               </a>
             </div>
           </>
@@ -106,8 +84,7 @@ export default async function GenerationPage({
         ) : (
           <>
             <p className="text-sm text-muted mt-5">
-              Estamos generando tu texto e imagen. Suele tardar alrededor de un minuto: no cierres
-              esta página.
+              Estamos generando tu texto. Suele tardar unos segundos: no cierres esta página.
             </p>
             <div className="mt-6 flex items-center gap-3">
               <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />

@@ -4,13 +4,12 @@ vi.mock("@/lib/services/generation", () => ({
   getOrderForGeneration: vi.fn(),
   logStep: vi.fn().mockResolvedValue({}),
   markCompleted: vi.fn().mockResolvedValue({}),
-  saveTextAndImage: vi.fn().mockResolvedValue({}),
+  saveText: vi.fn().mockResolvedValue({}),
   setProcessing: vi.fn().mockResolvedValue({})
 }));
 
 vi.mock("@/lib/ai/factory", () => ({
-  getContentProvider: vi.fn(),
-  getImageProvider: vi.fn()
+  getContentProvider: vi.fn()
 }));
 
 import * as aiFactory from "@/lib/ai/factory";
@@ -34,31 +33,23 @@ describe("runGenerationPipeline", () => {
     vi.mocked(aiFactory.getContentProvider).mockReturnValue({
       generate: vi.fn().mockResolvedValue({ text: "texto", imagePrompt: "prompt" })
     } as never);
-    vi.mocked(aiFactory.getImageProvider).mockReturnValue({
-      generate: vi.fn().mockResolvedValue(Buffer.from([1, 2, 3]))
-    } as never);
     vi.mocked(generationService.getOrderForGeneration).mockResolvedValue(
       orderWith("QUEUED") as never
     );
   });
 
-  it("ejecuta los 4 pasos y registra logs RUNNING/SUCCESS", async () => {
+  it("ejecuta los 3 pasos y registra logs RUNNING/SUCCESS", async () => {
     await runGenerationPipeline("ord_1", run);
 
     expect(generationService.getOrderForGeneration).toHaveBeenCalledWith("ord_1");
     expect(generationService.setProcessing).toHaveBeenCalledWith("ord_1");
     expect(aiFactory.getContentProvider).toHaveBeenCalledTimes(1);
-    expect(aiFactory.getImageProvider).toHaveBeenCalledTimes(1);
-    expect(generationService.saveTextAndImage).toHaveBeenCalledWith(
-      "ord_1",
-      "texto",
-      new Uint8Array([1, 2, 3])
-    );
+    expect(generationService.saveText).toHaveBeenCalledWith("ord_1", "texto");
     expect(generationService.markCompleted).toHaveBeenCalledWith("ord_1");
 
     const logCalls = vi.mocked(generationService.logStep).mock.calls;
     const steps = logCalls.map((call) => `${call[1]}:${call[2]}`);
-    for (const step of ["GENERATE_TEXT", "GENERATE_IMAGE", "UPLOAD_RESULT", "MARK_COMPLETED"]) {
+    for (const step of ["GENERATE_TEXT", "UPLOAD_RESULT", "MARK_COMPLETED"]) {
       expect(steps).toContain(`${step}:RUNNING`);
       expect(steps).toContain(`${step}:SUCCESS`);
     }
@@ -92,7 +83,7 @@ describe("runGenerationPipeline", () => {
 
     const logCalls = vi.mocked(generationService.logStep).mock.calls;
     expect(logCalls.some((call) => call[1] === "GENERATE_TEXT" && call[2] === "FAILED")).toBe(true);
-    expect(generationService.saveTextAndImage).not.toHaveBeenCalled();
+    expect(generationService.saveText).not.toHaveBeenCalled();
     expect(generationService.markCompleted).not.toHaveBeenCalled();
   });
 });

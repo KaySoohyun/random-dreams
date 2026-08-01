@@ -1,11 +1,11 @@
-import { getContentProvider, getImageProvider } from "@/lib/ai/factory";
+import { getContentProvider } from "@/lib/ai/factory";
 import type { AIContentInput } from "@/lib/ai/types";
 import type { PipelineStep } from "@/lib/generated/prisma/client";
 import {
   getOrderForGeneration,
   logStep,
   markCompleted,
-  saveTextAndImage,
+  saveText,
   setProcessing
 } from "@/lib/services/generation";
 
@@ -58,17 +58,10 @@ export async function runGenerationPipeline(orderId: string, run: StepRun) {
     aiPromptTemplate: order.product.aiPromptTemplate
   };
   const contentProvider = getContentProvider();
-  const imageProvider = getImageProvider();
 
   const generated = await runStep(orderId, run, "GENERATE_TEXT", () =>
     contentProvider.generate(input)
   );
-  const imageBytes: number[] = await runStep(orderId, run, "GENERATE_IMAGE", async () => {
-    const buffer = await imageProvider.generate(generated.imagePrompt);
-    return Array.from(new Uint8Array(buffer));
-  });
-  await runStep(orderId, run, "UPLOAD_RESULT", () =>
-    saveTextAndImage(orderId, generated.text, new Uint8Array(imageBytes))
-  );
+  await runStep(orderId, run, "UPLOAD_RESULT", () => saveText(orderId, generated.text));
   await runStep(orderId, run, "MARK_COMPLETED", () => markCompleted(orderId));
 }
