@@ -11,6 +11,7 @@ export type ProductSeed = {
   aiTextTemplate: string;
   aiPromptTemplate: string;
   sortOrder: number;
+  imageUrl?: string;
 };
 
 export const products: ProductSeed[] = [
@@ -36,11 +37,12 @@ export const products: ProductSeed[] = [
       "Escribe una crónica personal de {nombre}, {anios_despues} años después del punto de quiebre: {punto_quiebre}, en un universo paralelo donde eligió {camino_alternativo} en lugar de {vida_real}. Relato en primera persona, tono {tono_relato}. Incluye detalles de su vida cotidiana, sus logros, sus dudas y una escena clave de ese universo. Formato de diario/crónica.",
     aiPromptTemplate:
       "Genera un retrato de {nombre} viviendo su vida en el universo paralelo donde eligió {camino_alternativo}. Estilo: {estilo_retrato}. Escena: un momento cotidiano significativo que refleje {tono_relato}, {anios_despues} años después del punto de quiebre. Ambientación coherente con la vida descrita. Alto detalle, composición tipo retrato/documental.",
-    sortOrder: 1
+    sortOrder: 1,
+    imageUrl: "/assets/souvenir.jpg"
   },
   {
     slug: "quimera-de-biotopo",
-    name: "Quimera de Biotopo",
+    name: "Criatura fantástica",
     tagline:
       "Adoptá tu quimera: una criatura fantástica única, combinación de 2 o 3 animales, con su ficha de adopción completa.",
     description:
@@ -58,11 +60,12 @@ export const products: ProductSeed[] = [
       "Crea la ficha de adopción de la quimera {nombre_criatura}, resultado de la combinación de {animales}. Clima preferido: {clima}. Nivel de agresividad: {agresividad}. Incluye: descripción física, árbol genealógico, dieta absurda y manual de cuidados. Tono de catálogo científico de criaturas fantásticas con humor seco. Formato ficha técnica.",
     aiPromptTemplate:
       "Render 3D estilo ilustración científica de la criatura fantástica {nombre_criatura}, combinación de {animales}, adaptada al clima {clima}, nivel de agresividad {agresividad}. Fondo de estudio de biología, anatomía detallada, luz neutra, etiqueta de espécimen en la esquina.",
-    sortOrder: 2
+    sortOrder: 2,
+    imageUrl: "/assets/adopta.png"
   },
   {
     slug: "manual-de-contingencia-absurda",
-    name: "Manual de Contingencia Absurda",
+    name: "Manual Absurdo",
     tagline:
       "Plan de evacuación personalizado si tu vecindario es invadido por [X]. Consultoría de emergencia hiperlocal y disparatada.",
     description:
@@ -79,7 +82,8 @@ export const products: ProductSeed[] = [
       "Redacta un manual de evacuación personalizado para {ciudad} ante la invasión de {amenaza}. Incluye: instrucciones paso a paso, cláusulas de seguridad, rutas ficticias de evacuación y protocolos por situación. Tono: {tono_manual}. Nivel de detalle: {nivel_detalle}. Formato de manual institucional con pasos numerados y advertencias.",
     aiPromptTemplate:
       "Genera un mapa esquemático de evacuación de {ciudad} ante la amenaza de {amenaza}. Estilo: plano técnico / cartel institucional, con rutas marcadas, puntos de encuentro, leyendas y advertencias. Tono: {tono_manual}. Esquemático, limpio, alta legibilidad.",
-    sortOrder: 3
+    sortOrder: 3,
+    imageUrl: "/assets/manual.png"
   },
   {
     slug: "identidad-secreta-de-epoca",
@@ -101,11 +105,12 @@ export const products: ProductSeed[] = [
       "Compone la biografía completa de {nombre}, {rol} en la época {epoca}, con rasgo de personalidad {rasgo}. Incluye: biografía, árbol genealógico, lista de enemigos y carta de recomendación. Datos coherentes con la época. Formato documento histórico ficcional.",
     aiPromptTemplate:
       "Crea el souvenir visual de la identidad secreta de {nombre}: {tipo_documento}, de la época {epoca}. Rol: {rol}. Reflejar el rasgo {rasgo} en el retrato o la caligrafía. Incluir sellos oficiales ficticios y envejecimiento acorde a {epoca}. Alto detalle histórico.",
-    sortOrder: 4
+    sortOrder: 4,
+    imageUrl: "/assets/ticket.jpg"
   },
   {
     slug: "formula-de-emociones",
-    name: "Fórmula de Emociones",
+    name: "Receta abstracta",
     tagline:
       "La fórmula molecular del Sabor del Fracaso o el aroma de la Nostalgia de 1998. Conceptos abstractos convertidos en productos consumibles.",
     description:
@@ -122,7 +127,8 @@ export const products: ProductSeed[] = [
       'Redacta la receta alquímica del "{emocion}" (año: {anio}). Incluye: lista de ingredientes imposibles (ej. "3 gramos de lluvia de noviembre"), instrucciones de preparación paso a paso, método alquímico/gastronómico, advertencias y forma de consumo. Tipo de producto: {tipo_producto}. Tono: manual de laboratorio/fogón con poesía.',
     aiPromptTemplate:
       'Diseña el packaging de "{emocion}" ({anio}) como {tipo_producto} en presentación {presentacion}, listo en la estantería de un supermercado. Etiqueta con el nombre del producto, ingredientes imaginarios y fecha {anio}. Estilo de producto comercial con toque onírico/alquímico.',
-    sortOrder: 5
+    sortOrder: 5,
+    imageUrl: "/assets/receta.jpg"
   },
   {
     slug: "mascota-epica",
@@ -146,7 +152,8 @@ export const products: ProductSeed[] = [
       "Escribe la leyenda heroica de {nombre_mascota}, un/una {especie} transformado/a en {heroe} de fantasía. Rasgo característico: {rasgo}. Accesorios: {accesorios}. Fondo: {fondo}. Incluye: su origen, sus hazañas, su personalidad noble y valiente, y una anécdota con su guardián humano. Estilo: {estilo}. Formato de crónica épica legendaria.",
     aiPromptTemplate:
       "Ilustra a {nombre_mascota}, un/una {especie}, transformado/a en {heroe} de fantasía. Estilo: {estilo}. Rasgo característico: {rasgo}. Accesorios: {accesorios}. Fondo: {fondo}. Expresión noble y valiente, colores vibrantes, detalle alto, composición centrada.",
-    sortOrder: 6
+    sortOrder: 6,
+    imageUrl: "/assets/mascota.png"
   }
 ];
 

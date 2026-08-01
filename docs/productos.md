@@ -7,7 +7,7 @@ En lugar de productos físicos, vendes recuerdos de cosas que nunca pasaron.
 * **Lo que genera la IA:**
 * **Texto:** Una crónica/diario redactado como si fuera de esa realidad.
 * **Imagen:** Un retrato al óleo o fotografía fotorrealista de la escena en esa realidad paralela.
-* **Portada:** Usar imagen ubicada en assets/souvenir_1.png
+* **Portada:** Usar imagen ubicada en assets/souvenir.png
 
 ---
 
@@ -20,7 +20,7 @@ Un mercado negro ficticio o un catálogo de adopción de criaturas fantásticas 
 * **Lo que genera la IA:**
 * **Texto:** Ficha de adopción, árbol genealógico, dieta absurda y manual de cuidados.
 * **Imagen:** Render 3D estilo ilustración científica del espécimen.
-* **Portada:** Usar imagen ubicada en assets/adopta_1.png
+* **Portada:** Usar imagen ubicada en assets/adopta.png
 
 
 ---
@@ -34,7 +34,7 @@ Servicio de consultoría y protocolos de emergencia hiperlocales y disparatados.
 * **Lo que genera la IA:**
 * **Texto:** Un manual de instrucciones paso a paso con cláusulas de seguridad y rutas ficticias.
 * **Imagen/Mapa:** Un mapa esquemático o ilustración del protocolo de emergencia.
-* **Portada:** Usar imagen ubicada en assets/manual_1.png
+* **Portada:** Usar imagen ubicada en assets/manual.png
 
 ---
 
@@ -47,7 +47,7 @@ Compra una vida paralela completa en cualquier época de la historia.
 * **Lo que genera la IA:**
 * **Texto:** Biografía completa, árbol genealógico, lista de enemigos y carta de recomendación de la realeza.
 * **Imagen:** Retrato de época adaptado o documento de identidad antiguo con sello oficial ficticio.
-* **Portada:** Usar imagen ubicada en assets/ticket_1.png
+* **Portada:** Usar imagen ubicada en assets/ticket.png
 
 ---
 
@@ -60,7 +60,7 @@ Transformar conceptos abstractos en productos "consumibles".
 * **Lo que genera la IA:**
 * **Texto:** Receta alquímica/gastronómica imposible (con ingredientes como "3 gramos de lluvia de noviembre").
 * **Imagen:** Diseño del frasco/packaging del producto terminado como si estuviera en la estantería de un supermercado.
-* **Portada:** Usar imagen ubicada en assets/receta_1.png
+* **Portada:** Usar imagen ubicada en assets/recetas.jpg
 
 ---
 
@@ -90,4 +90,4 @@ La mascota del usuario transformada en héroe de fantasía (caballero, mago, vik
 Ilustra a {nombre_mascota}, un/una {especie}, transformado/a en {heroe} de fantasía. Estilo: {estilo}. Rasgo característico: {rasgo}. Accesorios: {accesorios}. Fondo: {fondo}. Expresión noble y valiente, colores vibrantes, detalle alto, composición centrada.
 ```
 
-* **Portada:** Usar imagen ubicada en assets/mascota_1.png
+* **Portada:** Usar imagen ubicada en assets/mascota.png
