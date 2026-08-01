@@ -2,6 +2,7 @@ import { getContentProvider, getImageProvider } from "@/lib/ai/factory";
 import { interpolateTemplate } from "@/lib/ai/interpolate";
 import type { AIContentInput } from "@/lib/ai/types";
 import type { PipelineStep } from "@/lib/generated/prisma/client";
+import { messageOf } from "@/lib/utils/message";
 import {
   getOrderForGeneration,
   logStep,
@@ -11,10 +12,6 @@ import {
   saveText,
   setProcessing
 } from "@/lib/services/generation";
-
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 async function runStep<T>(orderId: string, step: PipelineStep, fn: () => Promise<T>): Promise<T> {
   const start = Date.now();
@@ -84,20 +81,10 @@ async function generateImageStep(
   if (hasImage) return;
 
   const imagePrompt = interpolateTemplate(aiPromptTemplate, formData);
-  const imageProvider = getImageProvider();
-  const start = Date.now();
-  await logStep(orderId, "GENERATE_IMAGE", "RUNNING");
-  try {
-    const buffer = await imageProvider.generate(imagePrompt);
+  await runStep(orderId, "GENERATE_IMAGE", async () => {
+    const buffer = await getImageProvider().generate(imagePrompt);
     await saveImage(orderId, new Uint8Array(buffer));
-    await logStep(orderId, "GENERATE_IMAGE", "SUCCESS", { durationMs: Date.now() - start });
-  } catch (error) {
-    await logStep(orderId, "GENERATE_IMAGE", "FAILED", {
-      error: messageOf(error),
-      durationMs: Date.now() - start
-    });
-    throw error;
-  }
+  });
 }
 
 export async function runImageGenerationInline(orderId: string) {

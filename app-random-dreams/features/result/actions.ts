@@ -2,18 +2,13 @@
 
 import { redirect } from "next/navigation";
 import { retryGeneration } from "@/lib/services/generation";
-import { runGenerationInline, runImageGenerationInline } from "@/trigger/pipeline";
-import { sendOrderConfirmed } from "@/trigger/events";
+import { runImageGenerationInline } from "@/trigger/pipeline";
+import { enqueueGeneration } from "@/trigger/events";
 
 export async function retryGenerationAction(orderId: string, _formData: FormData) {
   const result = await retryGeneration(orderId);
   if (result) {
-    try {
-      await sendOrderConfirmed(orderId);
-    } catch (error) {
-      console.warn("No se pudo encolar en Trigger.dev; se genera en línea:", error);
-      await runGenerationInline(orderId);
-    }
+    await enqueueGeneration(orderId);
   }
 
   redirect(`/generacion/${orderId}`);

@@ -31,10 +31,7 @@ export function saveText(orderId: string, text: string) {
     where: { orderId },
     data: {
       textContent: text,
-      textFileName: "resultado.txt",
-      imageFileName: null,
-      imageBytes: null,
-      imageFileUrl: null
+      textFileName: "resultado.txt"
     }
   });
 }

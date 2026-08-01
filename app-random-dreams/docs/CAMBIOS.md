@@ -59,3 +59,15 @@ Registro de cambios relevantes. Último primero.
 - Se observó el reintento automático funcionando: un `GENERATE_TEXT` falló por timeout de Gemini (504) y Trigger.dev reintentó hasta éxito.
 
 **Pendiente:** dejar documentado cómo desplegar tasks nuevas (`npx trigger.dev deploy`) y cómo configurar las env vars en el dashboard de Trigger.dev (ya están cargadas manualmente en prod y dev).
+
+## 2026-08-01 — Correcciones de calidad (rama mejoras-codigo)
+
+**Qué cambió:**
+
+- **Bug de imagen corregido (stale read):** `saveText` ya no borra la imagen; el pipeline lee el estado al inicio y `generateImageStep` solo regenera si no hay imagen. Antes, re-ejecutar el pipeline sobre un pedido con imagen la perdía.
+- **`enqueueGeneration` extraído:** el bloque `try { sendOrderConfirmed } catch { runGenerationInline }` estaba duplicado en las 3 Server Actions (checkout, result, admin); ahora vive en `trigger/events.ts`.
+- **`generateImageStep` reusa `runStep`:** elimina la duplicación del logging RUNNING/SUCCESS/FAILED.
+- **`messageOf` movido a `lib/utils/message.ts`** (compartido entre `pipeline.ts` y `tasks.ts`).
+- **Retry unificado:** `maxAttempts: 5` ahora solo en `trigger.config.ts`; se quitó el override en `tasks.ts`.
+- **Cache-Control en `/api/resultado`:** `no-store` al descargar; `private, max-age=3600` en vista previa (el resultado es inmutable tras COMPLETED).
+- **Lint en 0 warnings:** `argsIgnorePattern: "^_"` en `eslint.config.mjs`, parámetros renombrados a `_`-prefixed y import redundante de `FormField` eliminado en `prisma/seed-data.ts`.

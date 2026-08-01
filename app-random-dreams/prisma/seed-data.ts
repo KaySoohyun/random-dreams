@@ -1,6 +1,5 @@
 import type { Prisma } from "../lib/generated/prisma/client";
 
-import type { FormField } from "../features/forms/types";
 export type { FormField } from "../features/forms/types";
 
 export type ProductSeed = {

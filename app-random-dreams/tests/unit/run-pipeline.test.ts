@@ -15,9 +15,22 @@ vi.mock("@/lib/ai/factory", () => ({
   getImageProvider: vi.fn()
 }));
 
+const triggerMock = vi.hoisted(() => vi.fn().mockResolvedValue({ id: "run_1" }));
+
+vi.mock("@trigger.dev/sdk", () => ({
+  tasks: { trigger: triggerMock }
+}));
+
+vi.mock("@/trigger/pipeline", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/trigger/pipeline")>();
+  return { ...actual, runGenerationInline: vi.fn() };
+});
+
 import * as aiFactory from "@/lib/ai/factory";
 import * as generationService from "@/lib/services/generation";
 import { runGenerationPipeline, runImageGenerationInline } from "@/trigger/pipeline";
+import { runGenerationInline } from "@/trigger/pipeline";
+import { enqueueGeneration } from "@/trigger/events";
 
 function orderWith(status: string) {
   return {
@@ -175,5 +188,21 @@ describe("runImageGenerationInline", () => {
     const logCalls = vi.mocked(generationService.logStep).mock.calls;
     expect(logCalls.some((call) => call[1] === "GENERATE_IMAGE" && call[2] === "FAILED")).toBe(true);
     expect(generationService.saveImage).not.toHaveBeenCalled();
+  });
+});
+
+describe("enqueueGeneration", () => {
+  it("encola la generación y no cae a inline si Trigger.dev está disponible", async () => {
+    vi.clearAllMocks();
+    await enqueueGeneration("ord_1");
+    expect(triggerMock).toHaveBeenCalledWith("generate-dream", { orderId: "ord_1" });
+    expect(runGenerationInline).not.toHaveBeenCalled();
+  });
+
+  it("cae a la generación inline si Trigger.dev no está disponible", async () => {
+    vi.clearAllMocks();
+    triggerMock.mockRejectedValueOnce(new Error("no config"));
+    await enqueueGeneration("ord_1");
+    expect(runGenerationInline).toHaveBeenCalledWith("ord_1");
   });
 });

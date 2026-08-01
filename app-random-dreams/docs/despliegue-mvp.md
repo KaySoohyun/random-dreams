@@ -6,7 +6,7 @@ Pasos verificables para llevar **Random Dreams** a producción en **Vercel**. Ej
 
 - **URL de producción:** https://app-random-dreams.vercel.app (proyecto `kaysoohyuns-projects/app-random-dreams`, Vercel CLI `vercel deploy --prod`).
 - Desplegado el **2026-07-31** desde `main` (`502adfb`) con las env vars de la tabla de abajo.
-- **Migración Inngest → Trigger.dev (2026-08-01):** el pipeline de generación es ahora una **task de Trigger.dev** (`trigger/tasks.ts`, id `generate-text`). Las Server Actions encolan con `sendOrderConfirmed` y, si Trigger.dev no está configurado (sin `TRIGGER_SECRET_KEY`/`TRIGGER_API_URL`), caen al **fallback inline** (`runGenerationInline`) para no romper el flujo. El endpoint `/api/inngest` y el paquete `inngest` se eliminaron.
+- **Migración Inngest → Trigger.dev (2026-08-01):** el pipeline de generación es ahora una **task de Trigger.dev** (`trigger/tasks.ts`, id `generate-dream`) que genera **texto + imagen juntos**. Las Server Actions encolan con `enqueueGeneration` y, si Trigger.dev no está configurado (sin `TRIGGER_SECRET_KEY`/`TRIGGER_API_URL`), caen al **fallback inline** (`runGenerationInline`) para no romper el flujo. El endpoint `/api/inngest` y el paquete `inngest` se eliminaron.
 - Gotcha al setear env vars con `vercel env add` desde shell: los valores de `.env` local suelen ir **entre comillas dobles** (`KEY="valor"`); si se copian con `cut -d=` quedan con las comillas y Prisma no resuelve el host ("Can't reach database server at base"). Quitar las comillas (`v=${v%\"}; v=${v#\"}`) antes de `env add`.
 - El build de Vercel corre `next build --turbopack` y regenera el cliente Prisma automáticamente (auto-detección de Next); no hizo falta `vercel.json`.
 
