@@ -64,7 +64,7 @@ export default async function AdminOrderDetailPage({
         <Link href="/admin/ordenes" className="text-sm text-muted hover:text-ink">
           &larr; Volver a órdenes
         </Link>
-        <h2 className="font-semibold text-lg mt-1">Orden</h2>
+        <h2 className="mt-1 font-serif text-sm uppercase tracking-[1.5px] text-ink">Orden</h2>
         <p className="font-mono text-xs text-muted mt-0.5 break-all">{order.id}</p>
       </div>
 
@@ -82,8 +82,8 @@ export default async function AdminOrderDetailPage({
         </section>
 
         <section className="space-y-6">
-          <div className="border border-line rounded-xl p-6">
-            <h3 className="font-semibold">Pedido</h3>
+          <div className="rounded-[4px] border border-primary/30 bg-night-card/60 p-6">
+            <h3 className="font-serif text-xs uppercase tracking-[1.5px] text-ink">Pedido</h3>
             <dl className="mt-4 space-y-3">
               <Stat label="Estado de pago" value={paymentLabels[order.paymentStatus] ?? order.paymentStatus} />
               <Stat label="Creada" value={formatDate(order.createdAt)} />
@@ -91,9 +91,9 @@ export default async function AdminOrderDetailPage({
             </dl>
           </div>
 
-          <div className="border border-line rounded-xl p-6">
+          <div className="rounded-[4px] border border-primary/30 bg-night-card/60 p-6">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold">Generación</h3>
+              <h3 className="font-serif text-xs uppercase tracking-[1.5px] text-ink">Generación</h3>
               <Link
                 href={`/generacion/${order.id}`}
                 className="text-sm text-primary hover:underline"
@@ -126,7 +126,7 @@ export default async function AdminOrderDetailPage({
       </div>
 
       <section>
-        <h3 className="font-semibold text-lg">Logs de generación</h3>
+        <h3 className="font-serif text-sm uppercase tracking-[1.5px] text-ink">Logs de generación</h3>
         {order.generationLogs.length === 0 ? (
           <p className="text-sm text-muted mt-3">Sin logs.</p>
         ) : (

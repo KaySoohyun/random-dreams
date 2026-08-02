@@ -14,7 +14,7 @@ export default async function AdminPanelLayout({
     <div className="container-x max-w-5xl py-10">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
         <div>
-          <p className="text-lg font-bold tracking-tight">Admin · Random Dreams</p>
+          <p className="font-serif text-lg uppercase tracking-[2px] text-ink">Admin · Random Dreams</p>
           <p className="text-sm text-muted mt-0.5">Soporte y trazabilidad de órdenes.</p>
         </div>
         <nav className="flex flex-wrap items-center gap-4 text-sm">

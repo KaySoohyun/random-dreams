@@ -32,7 +32,9 @@ export default async function CheckoutPage({
       <Link href="/" className="text-sm text-muted hover:text-ink">
         &larr; Volver al catálogo
       </Link>
-      <h1 className="text-2xl font-bold tracking-tight mt-4">Confirmar tu creación</h1>
+      <h1 className="mt-4 font-serif text-2xl uppercase tracking-[2px] font-normal text-ink">
+        Confirmar tu creación
+      </h1>
 
       {order.paymentStatus === "REJECTED" ? (
         <p className="mt-6 text-sm text-danger">Este pedido no puede confirmarse.</p>
