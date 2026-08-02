@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -164,8 +165,8 @@ export default async function GenerationPage({
               }
             >
 
-              <div className="whitespace-pre-wrap rounded-lg border border-line bg-mist p-4 text-sm">
-                {generatedResult.textContent}
+              <div className="markdown-body rounded-lg border border-line bg-mist p-4">
+                <ReactMarkdown>{generatedResult.textContent}</ReactMarkdown>
               </div>
 
 
