@@ -35,9 +35,6 @@ export function ProductCard({ product }: { product: ProductModel }) {
         href={`/producto/${product.slug}`}
         className="absolute inset-0 z-10 flex items-end justify-start p-5"
       >
-        <span className="text-[11px] font-bold uppercase tracking-[1px] text-primary transition-colors group-hover:text-primary-hover">
-          Crear
-        </span>
       </Link>
     </article>
   );
