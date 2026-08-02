@@ -163,12 +163,11 @@ export default async function GenerationPage({
                   : "mt-6"
               }
             >
-              <div>
-                <p className="text-sm text-muted">Tu texto personalizado:</p>
-                <div className="whitespace-pre-wrap rounded-lg border border-line bg-mist p-4 mt-2 text-sm">
-                  {generatedResult.textContent}
-                </div>
+
+              <div className="whitespace-pre-wrap rounded-lg border border-line bg-mist p-4 text-sm">
+                {generatedResult.textContent}
               </div>
+
 
               {generatedResult.imageBytes ? (
                 <div className="relative aspect-[4/3] rounded-lg border border-line overflow-hidden bg-mist">
