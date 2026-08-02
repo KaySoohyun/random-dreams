@@ -56,7 +56,7 @@ Compra una vida paralela completa en cualquier época de la historia.
 Transformar conceptos abstractos en productos "consumibles".
 
 * **Producto:** *"La fórmula molecular e instrucciones de preparación del 'Sabor del Fracaso' o 'El aroma de la Nostalgia de 1998'"*.
-* **Inputs del cliente:** Una emoción y un año o recuerdo específico.
+* **Inputs del cliente:** Una emoción y un año específico.
 * **Lo que genera la IA:**
 * **Texto:** Receta alquímica/gastronómica imposible (con ingredientes como "3 gramos de lluvia de noviembre").
 * **Imagen:** Diseño del frasco/packaging del producto terminado como si estuviera en la estantería de un supermercado.

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getResultFile } from "@/lib/services/generation";
+import { getResultFile, getResultText } from "@/lib/services/generation";
+import { renderResultPdf } from "@/lib/pdf/markdown-pdf";
 
-const formatoSchema = z.enum(["texto", "imagen"]);
+export const runtime = "nodejs";
+
+const formatoSchema = z.enum(["texto", "imagen", "pdf"]);
 
 export async function GET(
   _request: Request,
@@ -20,6 +23,19 @@ export async function GET(
     descarga = url.searchParams.get("descarga") === "1";
   } catch {
     return NextResponse.json({ error: "formato inválido" }, { status: 400 });
+  }
+
+  if (formato === "pdf") {
+    const text = await getResultText(orderId);
+    if (!text) {
+      return NextResponse.json({ error: "Resultado no encontrado" }, { status: 404 });
+    }
+    const pdfBytes = await renderResultPdf(text);
+    const headers = new Headers();
+    headers.set("Content-Type", "application/pdf");
+    headers.set("Content-Disposition", 'attachment; filename="resultado.pdf"');
+    headers.set("Cache-Control", "no-store");
+    return new NextResponse(new Uint8Array(pdfBytes), { headers });
   }
 
   const file = await getResultFile(orderId, formato);

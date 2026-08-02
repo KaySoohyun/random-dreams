@@ -39,7 +39,7 @@ export const products: ProductSeed[] = [
     imageUrl: "/assets/souvenir.jpg"
   },
   {
-    slug: "quimera-de-biotopo",
+    slug: "criatura-fantastica",
     name: "Criatura fantástica",
     tagline:
       "Crea una criatura fantástica única",
@@ -53,7 +53,7 @@ export const products: ProductSeed[] = [
       ]
     },
     aiTextTemplate:
-      "Crea la ficha de adopción de la quimera {nombre_criatura}. Clima preferido: {clima}. Nivel de agresividad: {agresividad}. Incluye: descripción física, árbol genealógico, dieta absurda y manual de cuidados. Tono de catálogo científico de criaturas fantásticas con humor seco. Formato ficha técnica.",
+      "Crea la ficha de adopción de una criatura fantástica {nombre_criatura}. Clima preferido: {clima}. Nivel de agresividad: {agresividad}. Incluye: descripción física, árbol genealógico, dieta absurda y manual de cuidados. Tono de catálogo científico de criaturas fantásticas con humor seco. Formato ficha técnica.",
     aiPromptTemplate:
       "Render 3D estilo ilustración científica de la criatura fantástica {nombre_criatura}, adaptada al clima {clima}, nivel de agresividad {agresividad}. Fondo de estudio de biología, anatomía detallada, luz neutra, etiqueta de espécimen en la esquina.",
     sortOrder: 2,
@@ -111,7 +111,7 @@ export const products: ProductSeed[] = [
       "Recetas alquímicas completsa: ingredientes imposibles, instrucciones de preparación y advertencias, más el packaging listo para la estantería.",
     formSchema: {
       fields: [
-        { name: "anio", label: "Año o recuerdo específico", type: "number", required: true, min: 1900, max: 2026, placeholder: "Ej. 1998" },
+        { name: "anio", label: "Año específico", type: "number", required: true, min: 1900, max: 2026, placeholder: "Ej. 1998" },
         { name: "tipo_producto", label: "Tipo de producto", type: "select", required: true, options: ["Perfume", "Golosina", "Bebida", "Plato", "Remedio alquímico"] },
         { name: "presentacion", label: "Presentación", type: "select", required: true, options: ["Frasco de vidrio", "Lata", "Botella", "Estuche", "Ampolla"] }
       ]
