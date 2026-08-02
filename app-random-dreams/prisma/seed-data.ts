@@ -17,26 +17,24 @@ export type ProductSeed = {
 export const products: ProductSeed[] = [
   {
     slug: "souvenir-de-vida-paralela",
-    name: "Souvenir de Vida Paralela",
+    name: "Souvenirs de Sueños y Realidades Alternativas",
     tagline:
-      "Fotografía e historia de tu vida en un universo paralelo donde elegiste otra carrera o país.",
+      "Fotografía e historia de tu vida en un universo paralelo donde elegiste otra vida.",
     description:
       "Contanos sobre tu vida real y el momento en que todo podría haber cambiado. Generaremos una crónica personal en primera persona de tu otra vida, junto con un retrato de la persona que habrías llegado a ser.",
     formSchema: {
       fields: [
         { name: "nombre", label: "Tu nombre", type: "text", required: true, maxLength: 60, placeholder: "Ej. Martín" },
-        { name: "vida_real", label: "Tu vida real (carrera o país actual)", type: "text", required: true, maxLength: 120, placeholder: "Ej. soy contador viviendo en Buenos Aires" },
-        { name: "punto_quiebre", label: "El punto de quiebre", type: "text", required: true, maxLength: 160, placeholder: "Ej. el día que rechacé la beca para estudiar música" },
-        { name: "camino_alternativo", label: "Lo que elegiste en ese universo paralelo", type: "text", required: true, maxLength: 160, placeholder: "Ej. me fui a estudiar piano a Viena" },
-        { name: "anios_despues", label: "Años después del punto de quiebre", type: "number", required: false, min: 1, max: 60, placeholder: "Ej. 10" },
+        { name: "vida_real", label: "Tu vida real (carrera o país actual)", type: "text", required: true, maxLength: 120, placeholder: "Ej. soy contador viviendo en Argentina" },
+        { name: "anios_despues", label: "¿Cuántos años después?", type: "number", required: false, min: 1, max: 60, placeholder: "Ej. 10" },
         { name: "tono_relato", label: "Tono del relato", type: "select", required: true, options: ["Nostálgico", "Épico", "Humorístico", "Melancólico"] },
-        { name: "estilo_retrato", label: "Estilo del retrato", type: "select", required: true, options: ["Pintura al óleo", "Fotografía fotorrealista", "Ilustración editorial"] }
+        { name: "estilo_retrato", label: "Estilo del retrato", type: "select", required: true, options: ["Pintura al óleo", "Fotografía realista", "Ilustración editorial"] }
       ]
     },
     aiTextTemplate:
-      "Escribe una crónica personal de {nombre}, {anios_despues} años después del punto de quiebre: {punto_quiebre}, en un universo paralelo donde eligió {camino_alternativo} en lugar de {vida_real}. Relato en primera persona, tono {tono_relato}. Incluye detalles de su vida cotidiana, sus logros, sus dudas y una escena clave de ese universo. Formato de diario/crónica.",
+      "Escribe una crónica personal de {nombre}, {anios_despues} años después de un punto de quiebre. Crea un universo paralelo donde no eligió ser {vida_real}. Relato en primera persona, tono {tono_relato}. Incluye detalles de su vida cotidiana, sus logros, sus dudas y una escena clave de ese universo. Formato de diario/crónica.",
     aiPromptTemplate:
-      "Genera un retrato de {nombre} viviendo su vida en el universo paralelo donde eligió {camino_alternativo}. Estilo: {estilo_retrato}. Escena: un momento cotidiano significativo que refleje {tono_relato}, {anios_despues} años después del punto de quiebre. Ambientación coherente con la vida descrita. Alto detalle, composición tipo retrato/documental.",
+      "Genera un retrato de {nombre} viviendo su vida en el universo paralelo donde no eligió ser {vida_real}. Estilo: {estilo_retrato}. Escena: un momento cotidiano significativo que refleje {tono_relato}, {anios_despues} años después del punto de quiebre. Ambientación coherente con la vida descrita. Alto detalle, composición tipo retrato/documental.",
     sortOrder: 1,
     imageUrl: "/assets/souvenir.jpg"
   },
@@ -44,16 +42,15 @@ export const products: ProductSeed[] = [
     slug: "quimera-de-biotopo",
     name: "Criatura fantástica",
     tagline:
-      "Adoptá tu quimera: una criatura fantástica única, combinación de 2 o 3 animales, con su ficha de adopción completa.",
+      "Crea una criatura fantástica única",
     description:
       "Elegí los animales que la componen y su hábitat de adopción. Generaremos la ficha técnica de tu criatura imposible con su descripción física, su árbol genealógico y su manual de cuidados, más un render ilustrado para el museo.",
     formSchema: {
       fields: [
-        { name: "nombre_criatura", label: "Nombre de tu quimera (opcional)", type: "text", required: false, maxLength: 40, placeholder: "Ej. Fénix del Pantano" },
-        { name: "animales", label: "Combinación de animales (elegí 2 o 3)", type: "multiselect", required: true, min: 2, max: 3, options: ["León", "Águila", "Serpiente", "Lobo", "Pulpo", "Cabra", "Pez", "Murciélago", "Tortuga", "Escorpión"] },
+        { name: "nombre_criatura", label: "Nombre para la mascota", type: "text", required: true, maxLength: 40, placeholder: "Ej. Fénix del Pantano" },
+        { name: "animales", label: "Combinación de animales (elegí 2 o 3)", type: "multiselect", required: true, min: 2, max: 3, options: ["León", "Águila", "Serpiente", "Lobo", "Pulpo", "Cabra", "Pez", "Murciélago", "Tortuga", "Escorpión", "Perro", "Gato", "Cerdo", "Elefante", "Jirafa", "Hipopótamo", "Conejo", "Lagartija", "Paloma", "Cebra", "Gacela", "Tigre", "Puma", "Ballena", "Delfín", "Araña", "Atún", "Cangrejo", "Caballo", "Vaca", "Coatí", "Pavo Real", "Caracol"] },
         { name: "clima", label: "Clima preferido", type: "select", required: true, options: ["Tropical", "Desierto", "Tundra", "Selva", "Marino", "Montaña"] },
         { name: "agresividad", label: "Nivel de agresividad", type: "select", required: true, options: ["Dócil", "Travieso", "Territorial", "Peligroso"] },
-        { name: "habitat", label: "Hábitat de adopción", type: "select", required: false, options: ["Departamento", "Casa con jardín", "Reserva natural", "Fantasía libre"] }
       ]
     },
     aiTextTemplate:
