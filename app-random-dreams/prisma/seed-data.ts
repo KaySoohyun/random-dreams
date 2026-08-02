@@ -26,7 +26,7 @@ export const products: ProductSeed[] = [
       fields: [
         { name: "nombre", label: "Tu nombre", type: "text", required: true, maxLength: 60, placeholder: "Ej. Martín" },
         { name: "vida_real", label: "Tu vida real (carrera o país actual)", type: "text", required: true, maxLength: 120, placeholder: "Ej. soy contador viviendo en Argentina" },
-        { name: "anios_despues", label: "¿Cuántos años después?", type: "number", required: false, min: 1, max: 60, placeholder: "Ej. 10" },
+        { name: "anios_despues", label: "¿Hace cuántos años te hubiera gustado cambiar?", type: "number", required: false, min: 1, max: 60, placeholder: "Ej. 10" },
         { name: "tono_relato", label: "Tono del relato", type: "select", required: true, options: ["Nostálgico", "Épico", "Humorístico", "Melancólico"] },
         { name: "estilo_retrato", label: "Estilo del retrato", type: "select", required: true, options: ["Pintura al óleo", "Fotografía realista", "Ilustración editorial"] }
       ]
@@ -48,15 +48,14 @@ export const products: ProductSeed[] = [
     formSchema: {
       fields: [
         { name: "nombre_criatura", label: "Nombre para la mascota", type: "text", required: true, maxLength: 40, placeholder: "Ej. Fénix del Pantano" },
-        { name: "animales", label: "Combinación de animales (elegí 2 o 3)", type: "multiselect", required: true, min: 2, max: 3, options: ["León", "Águila", "Serpiente", "Lobo", "Pulpo", "Cabra", "Pez", "Murciélago", "Tortuga", "Escorpión", "Perro", "Gato", "Cerdo", "Elefante", "Jirafa", "Hipopótamo", "Conejo", "Lagartija", "Paloma", "Cebra", "Gacela", "Tigre", "Puma", "Ballena", "Delfín", "Araña", "Atún", "Cangrejo", "Caballo", "Vaca", "Coatí", "Pavo Real", "Caracol"] },
         { name: "clima", label: "Clima preferido", type: "select", required: true, options: ["Tropical", "Desierto", "Tundra", "Selva", "Marino", "Montaña"] },
         { name: "agresividad", label: "Nivel de agresividad", type: "select", required: true, options: ["Dócil", "Travieso", "Territorial", "Peligroso"] },
       ]
     },
     aiTextTemplate:
-      "Crea la ficha de adopción de la quimera {nombre_criatura}, resultado de la combinación de {animales}. Clima preferido: {clima}. Nivel de agresividad: {agresividad}. Incluye: descripción física, árbol genealógico, dieta absurda y manual de cuidados. Tono de catálogo científico de criaturas fantásticas con humor seco. Formato ficha técnica.",
+      "Crea la ficha de adopción de la quimera {nombre_criatura}. Clima preferido: {clima}. Nivel de agresividad: {agresividad}. Incluye: descripción física, árbol genealógico, dieta absurda y manual de cuidados. Tono de catálogo científico de criaturas fantásticas con humor seco. Formato ficha técnica.",
     aiPromptTemplate:
-      "Render 3D estilo ilustración científica de la criatura fantástica {nombre_criatura}, combinación de {animales}, adaptada al clima {clima}, nivel de agresividad {agresividad}. Fondo de estudio de biología, anatomía detallada, luz neutra, etiqueta de espécimen en la esquina.",
+      "Render 3D estilo ilustración científica de la criatura fantástica {nombre_criatura}, adaptada al clima {clima}, nivel de agresividad {agresividad}. Fondo de estudio de biología, anatomía detallada, luz neutra, etiqueta de espécimen en la esquina.",
     sortOrder: 2,
     imageUrl: "/assets/adopta.png"
   },
@@ -64,21 +63,19 @@ export const products: ProductSeed[] = [
     slug: "manual-de-contingencia-absurda",
     name: "Manual Absurdo",
     tagline:
-      "Plan de evacuación personalizado si tu vecindario es invadido por [X]. Consultoría de emergencia hiperlocal y disparatada.",
+      "Planes de evacuación personalizados por si tu vecindario es invadido. Consultoría de emergencia hiperlocal y disparatada.",
     description:
-      "Contanos la amenaza improbable que acecha tu barrio y recibí un manual institucional impecable: instrucciones paso a paso, rutas ficticias de evacuación y protocolos por situación, con su mapa esquemático para colgar en la puerta.",
+      "Amenazas improbables que acechan tu barrio y un manual institucional impecable de como actuar: instrucciones paso a paso, rutas ficticias de evacuación y protocolos por situación, con su mapa esquemático para colgar en la puerta.",
     formSchema: {
       fields: [
         { name: "ciudad", label: "Ciudad o dirección", type: "text", required: true, maxLength: 100, placeholder: "Ej. Barrio de La Boca, Buenos Aires" },
-        { name: "amenaza", label: "Tipo de amenaza", type: "text", required: true, maxLength: 80, placeholder: "Ej. patos gigantes, viajeros del tiempo desorientados, zombies victorianos" },
-        { name: "tono_manual", label: "Tono del manual", type: "select", required: true, options: ["Formal y técnico", "Humor absurdo", "Apocalíptico serio", "Parodia institucional"] },
         { name: "nivel_detalle", label: "Nivel de detalle", type: "select", required: false, options: ["Rápido (1 página)", "Completo (2-3 páginas)", "Exhaustivo (protocolo completo)"] }
       ]
     },
     aiTextTemplate:
-      "Redacta un manual de evacuación personalizado para {ciudad} ante la invasión de {amenaza}. Incluye: instrucciones paso a paso, cláusulas de seguridad, rutas ficticias de evacuación y protocolos por situación. Tono: {tono_manual}. Nivel de detalle: {nivel_detalle}. Formato de manual institucional con pasos numerados y advertencias.",
+      "Redacta un manual de evacuación personalizado para {ciudad} ante una invasion absurda. Incluye: instrucciones paso a paso, cláusulas de seguridad, rutas ficticias de evacuación y protocolos por situación. Tono: Humor absurdo. Nivel de detalle: {nivel_detalle}. Formato de manual institucional con pasos numerados y advertencias.",
     aiPromptTemplate:
-      "Genera un mapa esquemático de evacuación de {ciudad} ante la amenaza de {amenaza}. Estilo: plano técnico / cartel institucional, con rutas marcadas, puntos de encuentro, leyendas y advertencias. Tono: {tono_manual}. Esquemático, limpio, alta legibilidad.",
+      "Genera un mapa esquemático de evacuación de {ciudad} ante la amenaza de una invasion absurda. Estilo: plano técnico / cartel institucional, con rutas marcadas, puntos de encuentro, leyendas y advertencias. Tono: Humor absurdo. Esquemático, limpio, alta legibilidad.",
     sortOrder: 3,
     imageUrl: "/assets/manual.png"
   },
@@ -111,19 +108,18 @@ export const products: ProductSeed[] = [
     tagline:
       "La fórmula molecular del Sabor del Fracaso o el aroma de la Nostalgia de 1998. Conceptos abstractos convertidos en productos consumibles.",
     description:
-      "Elegí la emoción, el año y el tipo de producto, y generaremos su receta alquímica completa: ingredientes imposibles, instrucciones de preparación y advertencias, más el packaging listo para la estantería.",
+      "Recetas alquímicas completsa: ingredientes imposibles, instrucciones de preparación y advertencias, más el packaging listo para la estantería.",
     formSchema: {
       fields: [
-        { name: "emocion", label: "La emoción", type: "text", required: true, maxLength: 60, placeholder: "Ej. El Sabor del Fracaso, El aroma de la Nostalgia de 1998" },
         { name: "anio", label: "Año o recuerdo específico", type: "number", required: true, min: 1900, max: 2026, placeholder: "Ej. 1998" },
         { name: "tipo_producto", label: "Tipo de producto", type: "select", required: true, options: ["Perfume", "Golosina", "Bebida", "Plato", "Remedio alquímico"] },
         { name: "presentacion", label: "Presentación", type: "select", required: true, options: ["Frasco de vidrio", "Lata", "Botella", "Estuche", "Ampolla"] }
       ]
     },
     aiTextTemplate:
-      'Redacta la receta alquímica del "{emocion}" (año: {anio}). Incluye: lista de ingredientes imposibles (ej. "3 gramos de lluvia de noviembre"), instrucciones de preparación paso a paso, método alquímico/gastronómico, advertencias y forma de consumo. Tipo de producto: {tipo_producto}. Tono: manual de laboratorio/fogón con poesía.',
+      'Redacta la receta alquímica de alguna emocion al azar del año (año: {anio}). Incluye: lista de ingredientes imposibles (ej. "3 gramos de lluvia de noviembre"), instrucciones de preparación paso a paso, método alquímico/gastronómico, advertencias y forma de consumo. Tipo de producto: {tipo_producto}. Tono: manual de laboratorio/fogón con poesía.',
     aiPromptTemplate:
-      'Diseña el packaging de "{emocion}" ({anio}) como {tipo_producto} en presentación {presentacion}, listo en la estantería de un supermercado. Etiqueta con el nombre del producto, ingredientes imaginarios y fecha {anio}. Estilo de producto comercial con toque onírico/alquímico.',
+      'Diseña el packaging de alguna emocion al azar del año ({anio}) como {tipo_producto} en presentación {presentacion}, listo en la estantería de un supermercado. Etiqueta con el nombre del producto, ingredientes imaginarios y fecha {anio}. Estilo de producto comercial con toque onírico/alquímico.',
     sortOrder: 5,
     imageUrl: "/assets/receta.jpg"
   },
@@ -131,7 +127,7 @@ export const products: ProductSeed[] = [
     slug: "mascota-epica",
     name: "Mascota Épica",
     tagline:
-      "Tu mascota transformada en héroe de fantasía: caballero, mago, vikingo o samurái.",
+      "Tu mascota transformada en héroe de fantasía",
     description:
       "Contanos sobre tu mascota y el héroe que querés que sea. Generaremos su leyenda épica completa —origen, hazañas y anécdotas— y su ilustración heroica con los accesorios que elijas.",
     formSchema: {
