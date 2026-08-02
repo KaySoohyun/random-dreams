@@ -26,12 +26,6 @@ export function OrderSummary({ productName, formSchema, formData }: OrderSummary
           </div>
         ))}
       </dl>
-      <div className="mt-6 pt-5 border-t border-primary/20 text-sm text-muted space-y-1">
-        <p>
-          Entrega: texto <code>.txt</code> + imagen <code>.png</code> (generado en ~1 min).
-        </p>
-        <p className="font-medium text-ink">Sin cargo.</p>
-      </div>
     </div>
   );
 }
