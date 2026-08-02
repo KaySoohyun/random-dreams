@@ -20,18 +20,20 @@ const product: ProductModel = {
 };
 
 describe("ProductCard", () => {
-  it("muestra el nombre, el tagline y el CTA", () => {
+  it("muestra el nombre y el tagline", () => {
     render(<ProductCard product={product} />);
     expect(
       screen.getByRole("heading", { name: "Souvenir de Vida Paralela" })
     ).toBeTruthy();
     expect(screen.getByText("Tu vida en otro universo")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Crear" })).toBeTruthy();
   });
 
-  it("enlaza a la ficha del producto por slug", () => {
+  it("enlaza toda la card a la ficha del producto por slug", () => {
     render(<ProductCard product={product} />);
-    const link = screen.getByRole("link", { name: "Crear" });
-    expect(link.getAttribute("href")).toBe("/producto/souvenir-de-vida-paralela");
+    const links = screen.getAllByRole("link");
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute("href")).toBe(
+      "/producto/souvenir-de-vida-paralela"
+    );
   });
 });
