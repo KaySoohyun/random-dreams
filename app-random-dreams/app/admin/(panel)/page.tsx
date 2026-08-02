@@ -21,7 +21,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="font-semibold text-lg">Órdenes</h2>
+        <h2 className="font-serif text-sm uppercase tracking-[1.5px] text-ink">Órdenes</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
           {Object.keys(paymentLabels).map((status) => (
             <div key={status} className="border border-line rounded-xl p-4">
@@ -33,7 +33,7 @@ export default async function AdminDashboardPage() {
       </section>
 
       <section>
-        <h2 className="font-semibold text-lg">Generaciones</h2>
+        <h2 className="font-serif text-sm uppercase tracking-[1.5px] text-ink">Generaciones</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
           {Object.keys(resultLabels).map((status) => (
             <div key={status} className="border border-line rounded-xl p-4">
@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
 
       <section>
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-lg">Últimas órdenes</h2>
+          <h2 className="font-serif text-sm uppercase tracking-[1.5px] text-ink">Últimas órdenes</h2>
           <Link href="/admin/ordenes" className="text-sm text-primary hover:underline">
             Ver todas
           </Link>

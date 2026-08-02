@@ -37,22 +37,17 @@ export default async function ProductPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-6 items-start">
         <section>
-          <h1 className="text-2xl font-bold tracking-tight">{product.name}</h1>
+          <h1 className="font-serif text-2xl uppercase tracking-[2px] font-normal text-ink">
+            {product.name}
+          </h1>
           <p className="text-muted mt-3 leading-relaxed">{product.description}</p>
-          <div className="mt-6 text-sm text-muted border border-line rounded-xl p-4">
-            <span className="font-semibold text-ink">Qué obtenés:</span> texto{" "}
-            <code>.txt</code> + imagen <code>.png</code> (1024×1024)
-          </div>
-          <div className="mt-6 hidden lg:block">
-            <div className="h-72 bg-mist rounded-xl flex items-center justify-center text-muted text-sm">
-              [ilustración del producto]
-            </div>
-          </div>
         </section>
 
         <section>
-          <div className="border border-line rounded-xl p-6">
-            <h2 className="font-semibold mb-4">Personalizá tu creación</h2>
+          <div className="rounded-[4px] border border-primary/30 bg-night-card/80 p-6">
+            <h2 className="mb-4 font-serif text-sm uppercase tracking-[1.5px] text-ink">
+              Personalizá tu creación
+            </h2>
             {formSchema ? (
               <DynamicForm formSchema={formSchema} action={createOrderAction} />
             ) : (

@@ -1,76 +1,124 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface: #ffffff;
-  --color-mist: #f8fafc;
-  --color-line: #e2e8f0;
-  --color-ink: #0f172a;
-  --color-muted: #64748b;
-  --color-primary: #6d28d9;
-  --color-primary-hover: #5b21b6;
-  --color-primary-light: #ede9fe;
-  --color-success: #059669;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
+  /* Superficies */
+  --color-surface: #0b0f14;
+  --color-mist: #121820;
+  --color-panel: #0f151c;
 
-  /* Paleta "candy" (fuente de verdad: docs/colores.md — no cambiar sin preguntar) */
-  --color-candy-pink: #f8a8e8;
-  --color-candy-rose: #fe98d6;
-  --color-candy-coral: #ffa9bb;
-  --color-candy-lavender: #b8bafd;
-  --color-candy-sky: #aeddfa;
-  --color-candy-plum-dark: #2c1328;
-  --color-candy-plum-muted: #4a2e46;
-  --color-candy-navy-dark: #141c38;
-  --color-candy-charcoal: #1a1d20;
+  /* Bordes */
+  --color-line: rgba(212, 175, 55, 0.22);
+
+  /* Texto */
+  --color-ink: #f8fafc;
+  --color-ink-muted: #d1d5db;
+  --color-muted: #94a3b8;
+  --color-faint: #64748b;
+
+  /* Dorado (acento principal) */
+  --color-primary: #d4af37;
+  --color-primary-hover: #fef08a;
+  --color-primary-light: rgba(212, 175, 55, 0.16);
+
+  /* Estados */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+
+  /* Paleta "gold-night" (fuente de verdad: docs/colores.md — no cambiar sin preguntar) */
+  --color-gold: #d4af37;
+  --color-gold-hover: #fef08a;
+  --color-gold-dim: #a5842a;
+  --color-cream: #f8fafc;
+  --color-night: #0b0f14;
+  --color-night-card: #121820;
+  --color-night-panel: #0f151c;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
 }
 
 @utility container-x {
-  max-width: 1120px;
+  max-width: 1200px;
   margin-inline: auto;
-  padding-inline: 1rem;
+  padding-inline: 1.25rem;
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-hover;
+    @apply rounded-[2px] px-6 py-3 text-[11px] font-bold uppercase tracking-[2px] text-night;
+    background-color: var(--color-gold);
+  }
+  .btn-primary:hover {
+    background-color: var(--color-gold-hover);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
   }
   .btn-outline {
-    @apply border border-line bg-surface text-ink hover:border-primary hover:text-primary;
+    @apply rounded-[2px] px-5 py-2.5 text-[11px] font-bold uppercase tracking-[1.5px];
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: var(--color-gold);
+    background: transparent;
+  }
+  .btn-outline:hover {
+    border-color: var(--color-gold);
+    color: var(--color-gold-hover);
+  }
+  .btn-gold {
+    @apply rounded-[2px] px-7 py-3 text-[11px] font-bold uppercase tracking-[2px];
+    background-color: var(--color-gold);
+    color: var(--color-night);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-gold:hover {
+    background-color: var(--color-gold-hover);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
   }
   .field-label {
-    @apply block text-sm font-semibold mb-1.5;
+    @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-[1.5px] text-ink;
   }
   .field-input {
-    @apply w-full h-10 px-3 rounded-[10px] border border-line bg-surface text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light;
+    @apply h-10 w-full rounded-[4px] border px-3 text-sm text-ink placeholder:text-faint focus:outline-none focus:ring-2;
+    background-color: rgba(18, 24, 32, 0.6);
+    border-color: rgba(212, 175, 55, 0.3);
   }
-  .btn-gradient-candy {
-    background: linear-gradient(135deg,
-      var(--color-candy-pink) 0%,
-      var(--color-candy-rose) 25%,
-      var(--color-candy-coral) 50%,
-      var(--color-candy-lavender) 75%,
-      var(--color-candy-sky) 100%);
-    background-size: 300% 300%;
-    background-position: 0% 50%;
-    transition: all 0.5s ease-in-out;
-  }
-  .btn-gradient-candy:hover {
-    background-position: 100% 50%;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(248, 168, 232, 0.4), 0 8px 10px -6px rgba(184, 186, 253, 0.3);
-  }
-  .btn-gradient-candy:active {
-    transform: translateY(0);
+  .field-input:focus {
+    border-color: var(--color-gold);
+    --tw-ring-color: rgba(212, 175, 55, 0.25);
   }
 }
 
 body {
   background-color: var(--color-surface);
   color: var(--color-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* FONDO DIFUMINADO Y TRANSICIÓN (estilo docs/componentes.md) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("/assets/background.png");
+  background-size: cover;
+  background-position: center;
+  filter: blur(2px);
+  transition: filter 0.5s ease-in-out;
+}
+
+/* SUPERPOSICIÓN OSCURA PARA TEXTO LEGIBLE */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: rgba(11, 15, 20, 0.6);
 }

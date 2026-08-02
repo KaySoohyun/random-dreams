@@ -7,7 +7,7 @@ export default async function AdminLoginPage() {
 
   return (
     <div className="container-x max-w-sm py-16">
-      <h1 className="text-2xl font-bold tracking-tight">Acceso al panel</h1>
+      <h1 className="font-serif text-2xl uppercase tracking-[2px] font-normal text-ink">Acceso al panel</h1>
       <p className="text-sm text-muted mt-2">Ingresá el token de administración.</p>
       <div className="mt-6">
         <LoginForm />

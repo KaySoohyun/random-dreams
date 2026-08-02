@@ -2,6 +2,23 @@
 
 Registro de cambios relevantes. Último primero.
 
+## 2026-08-02 — Rediseño "Recuerdos de lo Inexistente" (tema oscuro + dorado)
+
+**Qué cambió:**
+
+- `docs/componentes.md` se actualizó a un diseño **oscuro con acento dorado** (tipografía serif, fondos `#0b0f14`, dorado `#d4af37`). La web adopta ese diseño.
+- **`app/globals.css`:** se reemplaza la paleta "candy" por la paleta **"gold-night"** en `@theme` (`docs/colores.md` como fuente de verdad). Los tokens semánticos existentes (`surface`, `mist`, `line`, `ink`, `muted`, `primary`, `primary-hover`, `primary-light`, `success`, `warning`, `danger`) ahora apuntan a la nueva paleta, así que todas las páginas se retematizan sin tocar cada una. Se reestilizan `.btn-primary`, `.btn-outline`, `.field-label`, `.field-input`, se agrega `.btn-gold`, y el `body` pasa a serif con fondo oscuro + brillo dorado sutil de fondo.
+- **`app/layout.tsx`:** body con `font-serif` y la tipografía de la marca.
+- **Fondo:** se agrega la imagen de fondo `assets/background.png` (copiada a `public/assets/background.png`) como capa fija con `blur(2px)` + superposición oscura al 60%, tal como `docs/componentes.md` (`body::before`/`body::after` en `app/globals.css`).
+- **`components/ui/navbar.tsx`:** header sticky oscuro translúcido, logo dorado ✧, título y tagline en serif mayúsculas, nav en mayúsculas con hover dorado.
+- **`components/ui/footer.tsx`:** grid de 4 features al estilo `docs/componentes.md` (iconos dorados, títulos serif en mayúsculas) + barra de marca.
+- **`features/catalog/hero.tsx`:** hero de página completa, titular serif con acento dorado en bloque, subtítulo y CTA `.btn-gold` que ancla a `#catalogo`.
+- **`features/catalog/product-card.tsx` / `product-grid.tsx`:** cards con borde dorado sobre fondo oscuro, imagen con zoom al hover, nombre serif en mayúsculas, tagline/descripción en gris, CTA "Crear" dorado; grid con `id="catalogo"`.
+- **Páginas de storefront/admin:** titulares en serif mayúsculas y tarjetas con borde dorado (producto, checkout, generación, orden-summary, admin).
+- **Docs:** `docs/colores.md` reescrita con la paleta "gold-night"; `AGENTS.md` actualizado.
+
+**Nota:** la paleta "candy" anterior se eliminó; cualquier referencia pendiente (p. ej. `btn-gradient-candy`) dejó de existir.
+
 ## 2026-08-01 — Migración Inngest → Trigger.dev
 
 **Qué cambió:**

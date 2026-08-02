@@ -45,11 +45,15 @@ export default async function GenerationPage({
       <Link href="/" className="text-sm text-muted hover:text-ink">
         &larr; Volver al catálogo
       </Link>
-      <h1 className="text-2xl font-bold tracking-tight mt-4">Tu creación</h1>
+      <h1 className="mt-4 font-serif text-2xl uppercase tracking-[2px] font-normal text-ink">
+        Tu creación
+      </h1>
 
-      <div className="border border-line rounded-xl p-6 mt-6">
+      <div className="mt-6 rounded-[4px] border border-primary/30 bg-night-card/60 p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-semibold">{order.product.name}</h2>
+          <h2 className="font-serif text-sm uppercase tracking-[1.5px] text-ink">
+            {order.product.name}
+          </h2>
           <span className="text-sm text-muted">
             Estado: <span className="font-medium text-ink">{statusLabel[status] ?? status}</span>
           </span>
