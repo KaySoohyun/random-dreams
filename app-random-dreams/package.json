@@ -17,6 +17,7 @@
     "@google/genai": "^2.15.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "@react-pdf/renderer": "^4.5.1",
     "@trigger.dev/sdk": "^4.5.9",
     "next": "15.5.22",
     "pg": "^8.22.0",

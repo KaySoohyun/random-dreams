@@ -1,11 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/services/generation", () => ({
-  getResultFile: vi.fn()
+  getResultFile: vi.fn(),
+  getResultText: vi.fn()
+}));
+
+vi.mock("@/lib/pdf/markdown-pdf", () => ({
+  renderResultPdf: vi.fn()
 }));
 
 import { GET } from "@/app/api/resultado/[orderId]/route";
-import { getResultFile } from "@/lib/services/generation";
+import { getResultFile, getResultText } from "@/lib/services/generation";
+import { renderResultPdf } from "@/lib/pdf/markdown-pdf";
 
 async function get(url: string) {
   return GET(new Request(url), { params: Promise.resolve({ orderId: "ord_1" }) });
@@ -20,8 +26,29 @@ describe("GET /api/resultado/[orderId]", () => {
     const response = await get("http://localhost/api/resultado/ord_1");
     expect(response.status).toBe(400);
 
-    const invalid = await get("http://localhost/api/resultado/ord_1?formato=pdf");
+    const invalid = await get("http://localhost/api/resultado/ord_1?formato=json");
     expect(invalid.status).toBe(400);
+  });
+
+  it("devuelve 404 en pdf si no hay texto", async () => {
+    vi.mocked(getResultText).mockResolvedValue(null);
+
+    const response = await get("http://localhost/api/resultado/ord_1?formato=pdf");
+    expect(response.status).toBe(404);
+  });
+
+  it("devuelve el pdf con content-type application/pdf", async () => {
+    vi.mocked(getResultText).mockResolvedValue("# Título\n\nTexto.");
+    vi.mocked(renderResultPdf).mockResolvedValue(new Uint8Array([0x25, 0x50, 0x44, 0x46]));
+
+    const response = await get("http://localhost/api/resultado/ord_1?formato=pdf");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("application/pdf");
+    expect(response.headers.get("content-disposition")).toBe(
+      'attachment; filename="resultado.pdf"'
+    );
+    const body = Buffer.from(await response.arrayBuffer());
+    expect([...body]).toEqual([0x25, 0x50, 0x44, 0x46]);
   });
 
   it("devuelve 404 si no hay resultado o faltan bytes", async () => {

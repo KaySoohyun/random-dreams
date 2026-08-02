@@ -82,6 +82,11 @@ export async function retryGeneration(orderId: string) {
   });
 }
 
+export async function getResultText(orderId: string): Promise<string | null> {
+  const result = await prisma.generatedResult.findUnique({ where: { orderId } });
+  return result?.textContent ?? null;
+}
+
 export type ResultFile = {
   found: boolean;
   fileName?: string;
