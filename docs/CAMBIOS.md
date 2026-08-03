@@ -2,6 +2,8 @@
 
 ## 2026-08-03
 
+- **Mensaje para pedido no persistente (017)** — Al entrar por URL a un pedido que ya no está en memoria (`/generacion/[orderId]` o `/checkout/[orderId]` con order inexistente), en vez de 404 se muestra un aviso amigable **"Este pedido ya fue triturado"** con botón "Ir al catálogo" (`features/result/order-not-found.tsx`). Se reemplazó el `notFound()` de ambas páginas; e2e actualizado (espera el aviso en vez del 404). El admin sigue con 404 real (lee de la BD, no del store en memoria).
+
 - **Logo en el PDF (016)** — El PDF descargable (`/api/resultado/[orderId]?formato=pdf`) ahora lleva el logo `public/assets/logo_pdf.png` como **header arriba del contenido** (centrado, línea dorada inferior). `lib/pdf/markdown-pdf.tsx`: `readLogoDataUri` lee el archivo en build/runtime y lo incrusta como data URI; si falta, genera el PDF sin logo (no rompe). Fuente en `assets/logo_pdf.png`, copiada a `public/assets/`.
 
 - **Logo en la navbar y favicon de marca (016)** — `components/ui/navbar.tsx`: el ícono ✧ + textos "Random Dreams"/"Realidades alternativas" se reemplazaron por el logo `public/assets/logo.png` (`next/image`, 1787×762, `priority`). **Favicon gold-night**: `public/favicon/` con `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png` y `site.webmanifest` (name "Random Dreams", theme/background `#0b0f14`); metadata `manifest` + `icons` en `app/layout.tsx`; se eliminó `app/favicon.ico` por defecto (Next le daba prioridad). Verificado: manifest/íconos servidos (200) y `<link rel="icon">` en el HTML. Los assets fuente viven en `assets/` y se copian a `public/` (logo.png → `public/assets/`, favicon → `public/favicon/`).
