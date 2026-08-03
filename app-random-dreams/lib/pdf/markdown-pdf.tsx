@@ -1,5 +1,7 @@
 import "server-only";
-import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { Document, Page, StyleSheet, Text, View, Image, renderToBuffer } from "@react-pdf/renderer";
 import { parseMarkdown, type Block, type Inline } from "./markdown";
 
 const styles = StyleSheet.create({
@@ -44,6 +46,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#d1d5db",
     marginVertical: 10
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#d4af37"
+  },
+  headerImage: {
+    width: 140,
+    height: 60,
+    objectFit: "contain"
   }
 });
 
@@ -124,11 +138,17 @@ function BlockRenderer({ block }: { block: Block }) {
   }
 }
 
-function ResultDocument({ markdown }: { markdown: string }) {
+function ResultDocument({ markdown, logo }: { markdown: string; logo?: string }) {
   const blocks = parseMarkdown(markdown);
   return (
     <Document>
       <Page size="A4" style={styles.page}>
+        {logo ? (
+          <View style={styles.header}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text -- Image de @react-pdf no es <img> HTML */}
+            <Image src={logo} style={styles.headerImage} />
+          </View>
+        ) : null}
         {blocks.map((block, index) => (
           <BlockRenderer key={index} block={block} />
         ))}
@@ -137,7 +157,17 @@ function ResultDocument({ markdown }: { markdown: string }) {
   );
 }
 
+async function readLogoDataUri(): Promise<string | undefined> {
+  try {
+    const bytes = await readFile(join(process.cwd(), "public/assets/logo_pdf.png"));
+    return `data:image/png;base64,${bytes.toString("base64")}`;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function renderResultPdf(markdown: string): Promise<Uint8Array> {
-  const buffer = await renderToBuffer(<ResultDocument markdown={markdown} />);
+  const logo = await readLogoDataUri();
+  const buffer = await renderToBuffer(<ResultDocument markdown={markdown} logo={logo} />);
   return new Uint8Array(buffer);
 }
