@@ -17,7 +17,7 @@ export function Footer() {
             <h5 className="mt-2 text-xs uppercase tracking-[1px] text-ink">
               {feature.title}
             </h5>
-            <p className="mt-1 text-[11px] text-faint">{feature.text}</p>
+            <p className="mt-1 text-[12px] text-muted">{feature.text}</p>
           </div>
         ))}
       </div>

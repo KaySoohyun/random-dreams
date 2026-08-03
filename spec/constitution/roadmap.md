@@ -22,7 +22,7 @@ _(MVP completo y en producción. **008 · Autenticación y cuenta** fue cancelad
 
 _Tanda de pulido UX sobre el MVP desplegado: acabado visual y de robustez antes de encarar V1._
 
-1. **016 · Post-producción (pulido UX)** — Tipografía (a elección del usuario), aviso de pedido fallido en vez de mostrar el texto, aviso de imagen no disponible en vez de la imagen rota, nombres de archivo descargados con formato `<slug>-<campo-nombre>-<fecha>`, spinners y toasts propios (sin dependencias), y favicon de marca. Spec: `features/016-post-produccion/`.
+1. **016 · Post-producción (pulido UX)** — Tipografía (Domine en títulos + Faculty Glyphic en cuerpo), aviso de pedido fallido en vez de mostrar el texto, aviso de imagen no disponible en vez de la imagen rota, nombres de archivo descargados con formato `<slug>-<campo-nombre>-<fecha>`, spinners y toasts propios (sin dependencias), y favicon de marca. Spec: `features/016-post-produccion/`.
 
 ## Backlog / ideas 💡
 

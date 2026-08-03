@@ -79,6 +79,7 @@
 - Tailwind CSS con **design tokens** definidos en la configuración; no hardcodear colores/espaciados en los componentes.
 - El design system vive en `components/` (Button, Input, Field, Card, StatusBadge, ResultViewer); los componentes de feature no reimplementan primitivas.
 - Imágenes con `next/image` (dimensiones y optimización obligatorias).
+- **Assets estáticos**: los archivos fuente viven en `assets/` y se copian a `public/` para servirse (logo → `public/assets/`, favicon → `public/favicon/`); no servir desde `assets/` directo. Favicon: reemplazar los íconos en `public/favicon/` + `site.webmanifest` y no volver a crear `app/favicon.ico` (Next le da prioridad sobre los metadata `icons`).
 
 ## Testing
 

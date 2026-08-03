@@ -27,7 +27,15 @@ export const metadata: Metadata = {
     template: "%s · Random Dreams"
   },
   description:
-    "Realidades que no pasaron. Elegí un universo y generá tu propia historia alternativa con texto e imagen."
+    "Realidades que no pasaron. Elegí un universo y generá tu propia historia alternativa con texto e imagen.",
+  manifest: "/favicon/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" }
+    ],
+    apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180" }]
+  }
 };
 
 export default function RootLayout({
