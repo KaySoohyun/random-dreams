@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getOrderGeneration } from "@/lib/services/orders";
 import { retryGenerationAction } from "@/features/result/actions";
 import { OrderNotFound } from "@/features/result/order-not-found";
@@ -35,7 +36,8 @@ export default async function GenerationPage({
 }) {
   const { orderId } = await params;
   const order = await getOrderGeneration(orderId);
-  if (!order?.generatedResult) return <OrderNotFound />;
+  if (!order) return <OrderNotFound />;
+  if (!order.generatedResult) redirect(`/checkout/${orderId}`);
 
   const { generatedResult } = order;
   const status = generatedResult.aiResponseStatus;
