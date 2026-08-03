@@ -1,5 +1,9 @@
 # Registro de Cambios
 
+## 2026-08-03
+
+- **Feature 016 · Post-producción (pulido UX) — parte 1: spinners y toasts** — `components/ui/spinner.tsx` (`Spinner` accesible, tamaños sm/md/lg, `role="status"` + `aria-label`); `components/ui/toast.tsx` (`ToastProvider` + `useToast`, toasts apilados arriba-derecha con variantes success/error/info, botón de cierre, sin dependencias) montado en `app/layout.tsx`. Spinner reutilizado en la página de generación (estado `QUEUED`/`PROCESSING`) y en botones `pending` de `ConfirmForm`/`RetryForm`/`ImageGenerateForm`. Toasts: `DownloadMenu` ("Descarga iniciada"), errores vía `useActionState` en los tres formularios y toast de error al montar la página de generación en estado `ERROR` (`features/result/error-toast.tsx`). **Ajuste de contratos**: `confirmOrderAction` y `retryGenerationAction` pasan al patrón `useActionState` `(prev, formData) => Promise<{error?}>` (redirect fuera del try; `notFound` no se traga), coherente con `generateImageAction`; tests actualizados. Vitest 130 tests, lint 0 errores, build OK.
+
 ## 2026-07-31 (fase de implementación)
 
 - **Menores del QA resueltos + Lighthouse (2026-07-31)** — Se creó `app/robots.ts` (`robots.txt` con `Disallow: /admin` y `/api`), se agregaron security headers en `next.config.ts` (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`) en todas las rutas, y se instaló `lighthouse` (devDependency). Lighthouse contra producción: `/` 99/100/100/100, ficha 99/100/100/100 (LCP 1.8 s, TBT 110 ms, CLS 0), `/generacion` 99/100/100/100 (perf/a11y/best-practices/seo). Build+deploy OK; `robots.txt` y headers verificados en prod. La resolución del rojo (Inngest) quedó documentada en `docs/incidente-inngest-produccion.md`.

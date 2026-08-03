@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useToast } from "@/components/ui/toast";
 
 function DownloadIcon() {
   return (
@@ -92,6 +93,9 @@ const itemClass =
 export function DownloadMenu({ orderId, hasImage }: { orderId: string; hasImage: boolean }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  const notifyDownload = () => toast("Descarga iniciada", "info");
 
   useEffect(() => {
     if (!open) return;
@@ -133,7 +137,10 @@ export function DownloadMenu({ orderId, hasImage }: { orderId: string; hasImage:
             download
             role="menuitem"
             className={itemClass}
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              notifyDownload();
+            }}
           >
             <FilePdfIcon />
             <span>PDF (.pdf)</span>
@@ -143,7 +150,10 @@ export function DownloadMenu({ orderId, hasImage }: { orderId: string; hasImage:
             download
             role="menuitem"
             className={itemClass}
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+              notifyDownload();
+            }}
           >
             <FileTextIcon />
             <span>Texto (.txt)</span>
@@ -154,7 +164,10 @@ export function DownloadMenu({ orderId, hasImage }: { orderId: string; hasImage:
               download
               role="menuitem"
               className={itemClass}
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                notifyDownload();
+              }}
             >
               <ImageIcon />
               <span>Imagen</span>

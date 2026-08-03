@@ -9,6 +9,8 @@ import { AutoRefresh } from "@/features/result/auto-refresh";
 import { ImageGenerateForm } from "@/features/result/image-generate-form";
 import { RetryForm } from "@/features/result/retry-form";
 import { DownloadMenu } from "@/features/result/download-menu";
+import { ErrorToast } from "@/features/result/error-toast";
+import { Spinner } from "@/components/ui/spinner";
 
 export async function generateMetadata({
   params
@@ -124,13 +126,14 @@ export default async function GenerationPage({
               página.
             </p>
             <div className="mt-6 flex items-center gap-3">
-              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <Spinner size="md" className="text-primary" label={statusLabel[status] ?? status} />
               <span className="text-sm text-muted">{statusLabel[status] ?? status}</span>
             </div>
           </>
         )}
       </div>
 
+      {status === "ERROR" && <ErrorToast message={generatedResult.error} />}
       {!isTerminal && <AutoRefresh status={status} />}
     </div>
   );

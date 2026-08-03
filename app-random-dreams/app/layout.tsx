@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
+import { ToastProvider } from "@/components/ui/toast";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,9 +27,11 @@ export default function RootLayout({
   return (
     <html lang="es" className={inter.variable}>
       <body className="min-h-screen flex flex-col bg-surface text-ink font-serif antialiased">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <ToastProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </ToastProvider>
       </body>
     </html>
   );

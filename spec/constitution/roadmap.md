@@ -17,6 +17,12 @@ Orden y estado de las features. Es la vista de "qué hay hecho, qué toca ahora 
 
 _(MVP completo y en producción. **008 · Autenticación y cuenta** fue cancelada por decisión del usuario (2026-07-31): no se implementa auth por ahora; el MVP sigue tal cual.)_
 
+## Post-producción ✨
+
+_Tanda de pulido UX sobre el MVP desplegado: acabado visual y de robustez antes de encarar V1._
+
+1. **016 · Post-producción (pulido UX)** — Tipografía (a elección del usuario), aviso de pedido fallido en vez de mostrar el texto, aviso de imagen no disponible en vez de la imagen rota, nombres de archivo descargados con formato `<slug>-<campo-nombre>-<fecha>`, spinners y toasts propios (sin dependencias), y favicon de marca. Spec: `features/016-post-produccion/`.
+
 ## Backlog / ideas 💡
 
 ### V1 (Fase 2)
