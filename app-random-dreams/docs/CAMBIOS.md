@@ -2,6 +2,23 @@
 
 Registro de cambios relevantes. Último primero.
 
+## 2026-08-03 — Pedidos recuperables entre instancias serverless (cookie firmada)
+
+**Motivo:** en producción, un pedido recién creado a veces mostraba "Este pedido ya fue triturado" al navegar a su URL. La causa: el store en memoria de la feature 017 (`globalForStore`) solo se comparte entre requests en desarrollo; en producción **cada instancia serverless tiene su propio `Map`**, así que el pedido se perdía al cambiar de instancia o tras un cold start.
+
+**Qué cambió:**
+
+- `lib/store/order-cookie.ts` (nuevo): capa de recuperación del pedido en una **cookie firmada** (HMAC-SHA256 con `node:crypto`, `timingSafeEqual`). Cookie `rd_order_<id>`, httpOnly, sameSite lax, secure en prod, path `/`, maxAge 24 h. El payload es el `StoredOrder` serializado **sin `result.imageBytes`** (y sin `textContent` si supera ~3.5 KB, el límite práctico de cookies). El secreto se lee de `ORDER_COOKIE_SECRET` (con fallback solo para dev). Sin request scope (pipeline, tests) la escritura/lectura es no-op.
+- `lib/store/orders.ts`: se exportan `hydrateStoredOrder` y `getStoredOrderInStore`.
+- `lib/services/orders.ts`: `createPendingOrder` ahora es `async` y escribe la cookie al crear; `getOrderById`/`getCheckoutOrder`/`getOrderGeneration`/`getOrderForGeneration` primero intentan el store y, si no está, **hidratan desde la cookie**; `confirmOrder` re-escribe la cookie con el estado confirmado. Nuevo `syncOrderCookie(orderId)` (set o clear según el store).
+- `tests/unit/orders-service.test.ts`: actualizado a las funciones `async`.
+- `.env.example` (local, ignorado por git): se documenta `ORDER_COOKIE_SECRET`.
+
+**Pendiente (producción):**
+
+1. Definir `ORDER_COOKIE_SECRET` en Vercel (Settings → Environment Variables) con un valor largo y aleatorio; sin él, prod usa un fallback hardcodeado (no es una firma real).
+2. El resultado generado (texto/imagen) sigue sin persistir entre instancias: la cookie solo transporta el pedido y su estado al momento de confirmar. Si el serverless cambia durante la generación, la página puede quedar en "Generando…" hasta reintentar desde una instancia con el pedido en memoria.
+
 ## 2026-08-03 — Optimización de latencia del flujo form → checkout (sin BD en el render)
 
 **Motivo:** la transición de la página de producto (formulario) al checkout tardaba ~1.35 s. No hay API externa en ese tramo: la demora era la **base de datos remota** (Supabase, región ca-central-1, ~190-200 ms de ida y vuelta por query) sumada a la cantidad de round trips en secuencia.

@@ -90,6 +90,14 @@ export function getOrderInStore(id: string): StoredOrder | null {
   return order;
 }
 
+export function hydrateStoredOrder(order: StoredOrder): void {
+  orders.set(order.id, order);
+}
+
+export function getStoredOrderInStore(id: string): StoredOrder | null {
+  return getOrderInStore(id);
+}
+
 export function updateOrderInStore(
   id: string,
   patch: Partial<Pick<StoredOrder, "paymentStatus" | "confirmedAt" | "formData">>

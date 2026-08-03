@@ -27,3 +27,8 @@
   - [x] 7.1 Crear `features/result/order-not-found.tsx` ("Este pedido ya fue triturado" + botón "Ir al catálogo").
   - [x] 7.2 Reemplazar `notFound()` en `/generacion/[orderId]` y `/checkout/[orderId]` por el mensaje amigable.
   - [x] 7.3 Actualizar e2e: `/generacion/order-que-no-existe` ya no es 404, muestra el aviso.
+- [x] **8. Recuperación entre instancias (cookie firmada)**
+  - [x] 8.1 Crear `lib/store/order-cookie.ts`: cookie `rd_order_<id>` firmada con HMAC-SHA256 (`ORDER_COOKIE_SECRET`), sin `result.imageBytes` (y sin `textContent` si excede ~3.5 KB).
+  - [x] 8.2 `lib/services/orders.ts`: `createPendingOrder` async que escribe la cookie; getters hidratan desde la cookie si el store no tiene el pedido; `confirmOrder` re-escribe la cookie; nuevo `syncOrderCookie`.
+  - [x] 8.3 Actualizar `tests/unit/orders-service.test.ts` (funciones async) y documentar en `docs/CAMBIOS.md`.
+  - [ ] 8.4 Definir `ORDER_COOKIE_SECRET` en Vercel (Settings → Environment Variables).
