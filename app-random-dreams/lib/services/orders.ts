@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/db/prisma";
 import type { Prisma } from "@/lib/generated/prisma/client";
 
@@ -9,15 +10,19 @@ export async function createPendingOrder({
   productId: string;
   formData: Prisma.InputJsonValue;
 }) {
-  return prisma.$transaction(async (tx) => {
-    const order = await tx.order.create({
-      data: { productId, paymentStatus: "PENDING" }
-    });
-    await tx.formSubmission.create({
-      data: { orderId: order.id, formData }
-    });
-    return order;
-  });
+  const orderId = randomUUID();
+  const submissionId = randomUUID();
+  const [row] = await prisma.$queryRaw<Array<{ id: string }>>`
+    with new_order as (
+      insert into "Order" (id, "productId", "paymentStatus", "createdAt", "updatedAt")
+      values (${orderId}, ${productId}, 'PENDING', now(), now())
+      returning id
+    )
+    insert into "FormSubmission" (id, "orderId", "formData", "createdAt")
+    select ${submissionId}, id, ${JSON.stringify(formData)}::jsonb, now()
+    from new_order
+    returning "orderId" as id`;
+  return { id: row?.id ?? orderId, productId, paymentStatus: "PENDING" as const };
 }
 
 export function getOrderById(id: string) {
@@ -27,11 +32,65 @@ export function getOrderById(id: string) {
   });
 }
 
-export function getCheckoutOrder(id: string) {
-  return prisma.order.findUnique({
-    where: { id },
-    include: { product: true, formSubmission: true }
-  });
+type CheckoutOrderRow = {
+  id: string;
+  productId: string;
+  paymentStatus: string;
+  confirmedAt: Date | null;
+  productSlug: string;
+  productName: string;
+  productDescription: string;
+  productFormSchema: unknown;
+  submissionFormData: unknown;
+};
+
+export type CheckoutOrder = {
+  id: string;
+  productId: string;
+  paymentStatus: string;
+  confirmedAt: Date | null;
+  product: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string;
+    formSchema: unknown;
+  };
+  formSubmission: {
+    orderId: string;
+    formData: Prisma.JsonValue;
+  } | null;
+};
+
+export async function getCheckoutOrder(id: string): Promise<CheckoutOrder | null> {
+  const [row] = await prisma.$queryRaw<Array<CheckoutOrderRow>>`
+    select o.id, o."productId", o."paymentStatus", o."confirmedAt",
+           p.id as "productId", p.slug as "productSlug",
+           p.name as "productName", p.description as "productDescription",
+           p."formSchema" as "productFormSchema",
+           fs."formData" as "submissionFormData"
+    from "Order" o
+    join "Product" p on p.id = o."productId"
+    left join "FormSubmission" fs on fs."orderId" = o.id
+    where o.id = ${id}`;
+  if (!row) return null;
+  return {
+    id: row.id,
+    productId: row.productId,
+    paymentStatus: row.paymentStatus,
+    confirmedAt: row.confirmedAt,
+    product: {
+      id: row.productId,
+      slug: row.productSlug,
+      name: row.productName,
+      description: row.productDescription,
+      formSchema: row.productFormSchema
+    },
+    formSubmission:
+      row.submissionFormData === null || row.submissionFormData === undefined
+        ? null
+        : { orderId: row.id, formData: row.submissionFormData as Prisma.JsonValue }
+  };
 }
 
 export function getOrderGeneration(id: string) {

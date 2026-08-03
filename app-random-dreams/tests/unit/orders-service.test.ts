@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     $transaction: vi.fn(),
+    $queryRaw: vi.fn(),
     order: { findUnique: vi.fn() }
   }
 }));
@@ -17,6 +18,7 @@ import {
 } from "@/lib/services/orders";
 
 const mockTransaction = vi.mocked(prisma.$transaction);
+const mockQueryRaw = vi.mocked(prisma.$queryRaw);
 
 function orderWith(productId: string, paymentStatus: string, overrides: Record<string, unknown> = {}) {
   return {
@@ -31,15 +33,11 @@ function orderWith(productId: string, paymentStatus: string, overrides: Record<s
 describe("orders service", () => {
   beforeEach(() => {
     mockTransaction.mockReset();
+    mockQueryRaw.mockReset();
   });
 
-  it("crea una order PENDING y su FormSubmission en la misma transacción", async () => {
-    const mockOrder = { id: "ord_1", productId: "p1", paymentStatus: "PENDING" };
-    const tx = {
-      order: { create: vi.fn().mockResolvedValue(mockOrder) },
-      formSubmission: { create: vi.fn().mockResolvedValue({}) }
-    };
-    mockTransaction.mockImplementation(async (fn: (t: typeof tx) => Promise<unknown>) => fn(tx));
+  it("crea una order PENDING y su FormSubmission en una única query (CTE)", async () => {
+    mockQueryRaw.mockResolvedValue([{ id: "ord_1" }]);
 
     const order = await createPendingOrder({
       productId: "p1",
@@ -47,12 +45,15 @@ describe("orders service", () => {
     });
 
     expect(order.id).toBe("ord_1");
-    expect(tx.order.create).toHaveBeenCalledWith({
-      data: { productId: "p1", paymentStatus: "PENDING" }
-    });
-    expect(tx.formSubmission.create).toHaveBeenCalledWith({
-      data: { orderId: "ord_1", formData: { nombre: "Martín" } }
-    });
+    expect(order.paymentStatus).toBe("PENDING");
+    expect(mockQueryRaw).toHaveBeenCalledTimes(1);
+    const query = mockQueryRaw.mock.calls[0][0];
+    const values = mockQueryRaw.mock.calls[0].slice(1);
+    expect(String(query)).toContain("new_order");
+    expect(values[0]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(values[1]).toBe("p1");
+    expect(values[2]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(JSON.parse(String(values[3]))).toEqual({ nombre: "Martín" });
   });
 
   it("devuelve la order con su producto", async () => {
@@ -69,15 +70,27 @@ describe("orders service", () => {
     });
   });
 
-  it("devuelve la order con producto y formSubmission para el checkout", async () => {
-    vi.mocked(prisma.order.findUnique).mockResolvedValue(orderWith("p1", "PENDING") as never);
+  it("devuelve la order con producto y formSubmission para el checkout (join en 1 query)", async () => {
+    mockQueryRaw.mockResolvedValue([
+      {
+        id: "ord_1",
+        productId: "p1",
+        paymentStatus: "PENDING",
+        confirmedAt: null,
+        productSlug: "quimera",
+        productName: "Quimera",
+        productDescription: "desc",
+        productFormSchema: { fields: [] },
+        submissionFormData: { nombre: "Martín" }
+      }
+    ]);
 
     const order = await getCheckoutOrder("ord_1");
     expect(order).not.toBeNull();
-    expect(prisma.order.findUnique).toHaveBeenCalledWith({
-      where: { id: "ord_1" },
-      include: { product: true, formSubmission: true }
-    });
+    expect(order?.product.name).toBe("Quimera");
+    expect(order?.product.formSchema).toEqual({ fields: [] });
+    expect(order?.formSubmission?.formData).toEqual({ nombre: "Martín" });
+    expect(mockQueryRaw).toHaveBeenCalledTimes(1);
   });
 
   it("devuelve la order con producto y generatedResult para la página de generación", async () => {
