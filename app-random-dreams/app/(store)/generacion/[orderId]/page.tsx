@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { getOrderGeneration } from "@/lib/services/orders";
 import { retryGenerationAction } from "@/features/result/actions";
+import { OrderNotFound } from "@/features/result/order-not-found";
 import { AutoRefresh } from "@/features/result/auto-refresh";
 import { ImageUnavailable, ResultImage } from "@/features/result/result-image";
 import { RetryForm } from "@/features/result/retry-form";
@@ -35,7 +35,7 @@ export default async function GenerationPage({
 }) {
   const { orderId } = await params;
   const order = await getOrderGeneration(orderId);
-  if (!order?.generatedResult) notFound();
+  if (!order?.generatedResult) return <OrderNotFound />;
 
   const { generatedResult } = order;
   const status = generatedResult.aiResponseStatus;
@@ -92,9 +92,6 @@ export default async function GenerationPage({
             <p className="text-sm text-muted mt-5">
               La creación falló, probá en otra realidad.
             </p>
-            {generatedResult.error && (
-              <p className="text-sm text-danger mt-2">{generatedResult.error}</p>
-            )}
             <div className="mt-6">
               <RetryForm action={retryAction} />
             </div>
@@ -113,7 +110,7 @@ export default async function GenerationPage({
         )}
       </div>
 
-      {status === "ERROR" && <ErrorToast message={generatedResult.error} />}
+      {status === "ERROR" && <ErrorToast />}
       {!isTerminal && <AutoRefresh status={status} />}
     </div>
   );

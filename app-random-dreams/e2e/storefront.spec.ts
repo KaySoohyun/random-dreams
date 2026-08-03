@@ -90,7 +90,9 @@ test("404 en producto inexistente", async ({ page }) => {
   expect(response?.status()).toBe(404);
 });
 
-test("404 en generación inexistente", async ({ page }) => {
+test("mensaje amigable en generación inexistente (pedido no persistente)", async ({ page }) => {
   const response = await page.goto("/generacion/order-que-no-existe");
-  expect(response?.status()).toBe(404);
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { name: /triturado/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /ir al catálogo/i })).toBeVisible();
 });

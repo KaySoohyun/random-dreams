@@ -23,3 +23,7 @@
   - [x] 6.1 `npm test`, `npm run lint`, `npm run build` OK.
   - [x] 6.2 Prueba manual del flujo completo en `next dev` sin BD disponible.
   - [x] 6.3 Documentar en `docs/CAMBIOS.md` y actualizar `roadmap.md` (mover 017 a Hecho).
+- [x] **7. Mensaje para pedido no persistente**
+  - [x] 7.1 Crear `features/result/order-not-found.tsx` ("Este pedido ya fue triturado" + botón "Ir al catálogo").
+  - [x] 7.2 Reemplazar `notFound()` en `/generacion/[orderId]` y `/checkout/[orderId]` por el mensaje amigable.
+  - [x] 7.3 Actualizar e2e: `/generacion/order-que-no-existe` ya no es 404, muestra el aviso.

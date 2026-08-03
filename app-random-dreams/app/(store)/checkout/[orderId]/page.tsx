@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getCheckoutOrder } from "@/lib/services/orders";
 import { isFormSchema } from "@/features/forms/types";
 import { confirmOrderAction } from "@/features/checkout/actions";
 import { ConfirmForm } from "@/features/checkout/confirm-form";
 import { OrderSummary } from "@/features/checkout/order-summary";
+import { OrderNotFound } from "@/features/result/order-not-found";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: "Confirmar" };
@@ -18,7 +19,7 @@ export default async function CheckoutPage({
 }) {
   const { orderId } = await params;
   const order = await getCheckoutOrder(orderId);
-  if (!order) notFound();
+  if (!order) return <OrderNotFound />;
 
   if (order.paymentStatus === "APPROVED") {
     redirect(`/generacion/${order.id}`);
