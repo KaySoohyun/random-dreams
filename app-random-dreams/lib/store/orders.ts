@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { CatalogProduct } from "@/lib/data/products";
 import { getProductByIdData } from "@/lib/data/products";
-import { imageFileNameFor } from "@/lib/ai/image-format";
 
 export type PaymentStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -13,9 +12,7 @@ export type PipelineStepStatus = "RUNNING" | "SUCCESS" | "FAILED";
 
 export type StoredResult = {
   aiResponseStatus: AiResponseStatus;
-  textFileName: string | null;
   textContent: string | null;
-  imageFileName: string | null;
   imageBytes: Uint8Array | null;
   error: string | null;
   retryCount: number;
@@ -119,9 +116,7 @@ function resultOf(orderId: string): StoredResult {
   if (!order.result) {
     order.result = {
       aiResponseStatus: "QUEUED",
-      textFileName: null,
       textContent: null,
-      imageFileName: null,
       imageBytes: null,
       error: null,
       retryCount: 0,
@@ -147,7 +142,6 @@ export function saveResultText(orderId: string, text: string): void {
   const result = resultOf(orderId);
   Object.assign(result, {
     textContent: text,
-    textFileName: "resultado.txt",
     updatedAt: new Date()
   });
 }
@@ -156,7 +150,6 @@ export function saveResultImage(orderId: string, imageBytes: Uint8Array): void {
   const result = resultOf(orderId);
   Object.assign(result, {
     imageBytes: new Uint8Array(imageBytes),
-    imageFileName: imageFileNameFor(imageBytes),
     updatedAt: new Date()
   });
 }
@@ -169,9 +162,7 @@ export function resetResultForRetry(orderId: string): StoredResult | null {
     error: null,
     startedAt: null,
     completedAt: null,
-    textFileName: null,
     textContent: null,
-    imageFileName: null,
     imageBytes: null,
     retryCount: order.result.retryCount + 1,
     updatedAt: new Date()
@@ -260,7 +251,10 @@ export type GenerationOrderView = {
 export type PipelineOrderView = {
   id: string;
   productId: string;
-  product: Pick<CatalogProduct, "id" | "slug" | "aiTextTemplate" | "aiPromptTemplate">;
+  product: Pick<
+    CatalogProduct,
+    "id" | "slug" | "formSchema" | "aiTextTemplate" | "aiPromptTemplate"
+  >;
   formSubmission: { orderId: string; formData: Record<string, unknown> | null } | null;
   generatedResult: StoredResult | null;
 };
@@ -325,6 +319,7 @@ export function getOrderForGenerationInStore(id: string): PipelineOrderView | nu
     product: {
       id: product.id,
       slug: product.slug,
+      formSchema: product.formSchema,
       aiTextTemplate: product.aiTextTemplate,
       aiPromptTemplate: product.aiPromptTemplate
     },

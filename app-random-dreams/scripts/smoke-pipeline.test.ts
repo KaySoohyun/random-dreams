@@ -48,7 +48,6 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
     } else {
       expect(generatedResult.textContent!.length).toBeGreaterThan(40);
     }
-    expect(generatedResult.textFileName).toBe("resultado.txt");
     console.log("textContent:", generatedResult.textContent.slice(0, 120), "…");
 
     if (process.env.AI_MOCK === "true" && process.env.AI_IMAGE_OK !== "true") {
@@ -59,11 +58,10 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
     } else {
       expect(generatedResult.imageBytes?.length).toBeGreaterThan(0);
       if (process.env.AI_MOCK === "true") {
-        expect(generatedResult.imageFileName).toBe("resultado.png");
+        expect(generatedResult.imageBytes!.length).toBeGreaterThan(0);
       } else {
         expect(generatedResult.imageBytes!.length).toBeGreaterThan(1000);
       }
-      console.log("imagen generada:", generatedResult.imageFileName, generatedResult.imageBytes?.length, "bytes");
     }
 
     const after = getLogsForOrder(result).length;
@@ -71,7 +69,7 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
 
     const textFile = await getResultFile(result, "texto");
     expect(textFile.found).toBe(true);
-    expect(textFile.fileName).toBe("resultado.txt");
+    expect(textFile.fileName).toMatch(/^[a-z0-9-]+-\d{4}-\d{2}-\d{2}\.txt$/);
     expect(textFile.contentType).toBe("text/plain; charset=utf-8");
     expect(textFile.bytes?.length).toBe(
       new TextEncoder().encode(generatedResult.textContent as string).length
@@ -80,6 +78,7 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
     if (process.env.AI_MOCK !== "true" || process.env.AI_IMAGE_OK === "true") {
       const imageFile = await getResultFile(result, "imagen");
       expect(imageFile.found).toBe(true);
+      expect(imageFile.fileName).toMatch(/^[a-z0-9-]+-\d{4}-\d{2}-\d{2}\.(png|jpg)$/);
       expect(imageFile.contentType).toBe(
         process.env.AI_MOCK === "true" ? "image/png" : "image/jpeg"
       );

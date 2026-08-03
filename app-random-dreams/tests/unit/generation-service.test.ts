@@ -7,7 +7,9 @@ import {
   setResultStatus
 } from "@/lib/store/orders";
 import {
+  buildResultFileName,
   getResultFile,
+  getResultFileName,
   logStep,
   markCompleted,
   markError,
@@ -54,7 +56,6 @@ describe("generation service", () => {
 
     saveImage(id, new Uint8Array(png));
     const result = getOrderForGenerationInStore(id)?.generatedResult;
-    expect(result?.imageFileName).toBe("resultado.png");
     expect(Array.from(result?.imageBytes ?? [])).toEqual([...png]);
   });
 
@@ -66,8 +67,6 @@ describe("generation service", () => {
     saveText(id, "hola");
     const result = getOrderForGenerationInStore(id)?.generatedResult;
     expect(result?.textContent).toBe("hola");
-    expect(result?.textFileName).toBe("resultado.txt");
-    expect(result?.imageFileName).toBe("resultado.png");
     expect(result?.imageBytes).not.toBeNull();
   });
 
@@ -119,30 +118,33 @@ describe("generation service", () => {
     expect(retryGeneration(other.id)).toBeNull();
   });
 
-  it("getResultFile devuelve el texto con content-type text/plain", () => {
+  it("getResultFile devuelve el texto con nombre derivado y content-type text/plain", () => {
     const { id } = seedOrder();
     saveText(id, "hola");
 
     const file = getResultFile(id, "texto");
     expect(file.found).toBe(true);
-    expect(file.fileName).toBe("resultado.txt");
+    expect(file.fileName).toMatch(/^criatura-fantastica-fenix-\d{4}-\d{2}-\d{2}\.txt$/);
     expect(file.contentType).toBe("text/plain; charset=utf-8");
     expect(new TextDecoder().decode(file.bytes)).toBe("hola");
   });
 
-  it("getResultFile devuelve la imagen con content-type según sus bytes", () => {
+  it("getResultFile devuelve la imagen con nombre derivado y content-type según sus bytes", () => {
     const { id } = seedOrder();
     const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
     saveImage(id, new Uint8Array(png));
 
     const file = getResultFile(id, "imagen");
     expect(file.found).toBe(true);
-    expect(file.fileName).toBe("resultado.png");
+    expect(file.fileName).toMatch(/^criatura-fantastica-fenix-\d{4}-\d{2}-\d{2}\.png$/);
     expect(file.contentType).toBe("image/png");
     expect(Array.from(file.bytes as Uint8Array)).toEqual([...png]);
 
     const jpg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00]);
     saveImage(id, new Uint8Array(jpg));
+    expect(getResultFile(id, "imagen").fileName).toMatch(
+      /^criatura-fantastica-fenix-\d{4}-\d{2}-\d{2}\.jpg$/
+    );
     expect(getResultFile(id, "imagen").contentType).toBe("image/jpeg");
   });
 
@@ -152,5 +154,79 @@ describe("generation service", () => {
     const { id } = seedOrder();
     expect(getResultFile(id, "texto")).toEqual({ found: false });
     expect(getResultFile(id, "imagen")).toEqual({ found: false });
+  });
+});
+
+describe("buildResultFileName", () => {
+  it("arma <slug>-<nombre>-<fecha>.<ext> con nombre slugificado", () => {
+    const name = buildResultFileName({
+      slug: "souvenir-de-vida-paralela",
+      nameValue: "Martín García",
+      extension: "txt",
+      date: new Date(2026, 7, 3)
+    });
+    expect(name).toBe("souvenir-de-vida-paralela-martin-garcia-2026-08-03.txt");
+  });
+
+  it("quita acentos y caracteres no alfanuméricos", () => {
+    const name = buildResultFileName({
+      slug: "identidad-secreta-de-epoca",
+      nameValue: "¡Fénix del Pantano!",
+      extension: "png",
+      date: new Date(2026, 0, 5)
+    });
+    expect(name).toBe("identidad-secreta-de-epoca-fenix-del-pantano-2026-01-05.png");
+  });
+
+  it("sin nombre usa solo <slug>-<fecha>.<ext> (productos sin campo text)", () => {
+    const name = buildResultFileName({
+      slug: "formula-de-emociones",
+      nameValue: null,
+      extension: "txt",
+      date: new Date(2026, 1, 28)
+    });
+    expect(name).toBe("formula-de-emociones-2026-02-28.txt");
+  });
+
+  it("usa la fecha actual por defecto", () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const expected = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const name = buildResultFileName({
+      slug: "criatura-fantastica",
+      nameValue: "Loki",
+      extension: "txt"
+    });
+    expect(name).toBe(`criatura-fantastica-loki-${expected}.txt`);
+  });
+});
+
+describe("getResultFileName", () => {
+  beforeEach(() => {
+    resetStoreForTests();
+  });
+
+  it("deriva el nombre del primer campo text del formSchema y el formData", () => {
+    const { id } = createOrderInStore({
+      productId: "criatura-fantastica",
+      formData: { nombre_criatura: "Fénix" }
+    });
+
+    const name = getResultFileName(id, "txt", new Date(2026, 2, 1));
+    expect(name).toBe("criatura-fantastica-fenix-2026-03-01.txt");
+  });
+
+  it("ignora el primer campo si no es text (usa solo slug)", () => {
+    const { id } = createOrderInStore({
+      productId: "formula-de-emociones",
+      formData: { anio: 1998 }
+    });
+
+    const name = getResultFileName(id, "pdf", new Date(2026, 2, 1));
+    expect(name).toBe("formula-de-emociones-2026-03-01.pdf");
+  });
+
+  it("devuelve null si el pedido no existe", () => {
+    expect(getResultFileName("ord_404", "txt")).toBeNull();
   });
 });

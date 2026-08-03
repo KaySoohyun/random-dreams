@@ -64,7 +64,9 @@ test("flujo completo: catálogo → formulario → checkout → generación → 
     page.waitForEvent("download"),
     page.getByRole("menuitem", { name: "Texto (.txt)" }).click()
   ]);
-  expect(textDownload.suggestedFilename()).toBe("resultado.txt");
+  expect(textDownload.suggestedFilename()).toMatch(
+    new RegExp(`^${product.slug}-sofia-\\d{4}-\\d{2}-\\d{2}\\.txt$`)
+  );
   const textPath = await textDownload.path();
   if (!textPath) throw new Error("No hay path para el .txt");
   expect(readFileSync(textPath, "utf8")).toContain("[mock]");
@@ -73,7 +75,9 @@ test("flujo completo: catálogo → formulario → checkout → generación → 
     page.waitForEvent("download"),
     page.getByRole("menuitem", { name: "Imagen" }).click()
   ]);
-  expect(imageDownload.suggestedFilename()).toBe("resultado.png");
+  expect(imageDownload.suggestedFilename()).toMatch(
+    new RegExp(`^${product.slug}-sofia-\\d{4}-\\d{2}-\\d{2}\\.png$`)
+  );
   const imagePath = await imageDownload.path();
   if (!imagePath) throw new Error("No hay path para la imagen");
   const imageBytes = readFileSync(imagePath);
