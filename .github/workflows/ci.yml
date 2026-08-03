@@ -59,7 +59,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
-      - run: npx vitest run --config scripts/vitest.smoke.config.ts
+      - name: smoke — imagen generada (AI_IMAGE_OK=true)
+        run: npx vitest run --config scripts/vitest.smoke.config.ts
+        env:
+          AI_IMAGE_OK: "true"
+      - name: smoke — sin imagen (mock por defecto)
+        run: npx vitest run --config scripts/vitest.smoke.config.ts
 
   e2e:
     runs-on: ubuntu-latest

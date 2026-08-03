@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/services/generation", () => ({
   getResultFile: vi.fn(),
+  getResultFileName: vi.fn(),
   getResultText: vi.fn()
 }));
 
@@ -10,7 +11,7 @@ vi.mock("@/lib/pdf/markdown-pdf", () => ({
 }));
 
 import { GET } from "@/app/api/resultado/[orderId]/route";
-import { getResultFile, getResultText } from "@/lib/services/generation";
+import { getResultFile, getResultFileName, getResultText } from "@/lib/services/generation";
 import { renderResultPdf } from "@/lib/pdf/markdown-pdf";
 
 async function get(url: string) {
@@ -39,16 +40,28 @@ describe("GET /api/resultado/[orderId]", () => {
 
   it("devuelve el pdf con content-type application/pdf", async () => {
     vi.mocked(getResultText).mockResolvedValue("# Título\n\nTexto.");
+    vi.mocked(getResultFileName).mockReturnValue("souvenir-de-vida-paralela-sofia-2026-08-03.pdf");
     vi.mocked(renderResultPdf).mockResolvedValue(new Uint8Array([0x25, 0x50, 0x44, 0x46]));
 
     const response = await get("http://localhost/api/resultado/ord_1?formato=pdf");
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/pdf");
     expect(response.headers.get("content-disposition")).toBe(
-      'attachment; filename="resultado.pdf"'
+      'attachment; filename="souvenir-de-vida-paralela-sofia-2026-08-03.pdf"'
     );
     const body = Buffer.from(await response.arrayBuffer());
     expect([...body]).toEqual([0x25, 0x50, 0x44, 0x46]);
+  });
+
+  it("usa resultado.pdf como fallback si no se puede derivar el nombre del pdf", async () => {
+    vi.mocked(getResultText).mockResolvedValue("# Título");
+    vi.mocked(getResultFileName).mockReturnValue(null);
+    vi.mocked(renderResultPdf).mockResolvedValue(new Uint8Array([0x25, 0x50, 0x44, 0x46]));
+
+    const response = await get("http://localhost/api/resultado/ord_1?formato=pdf");
+    expect(response.headers.get("content-disposition")).toBe(
+      'attachment; filename="resultado.pdf"'
+    );
   });
 
   it("devuelve 404 si no hay resultado o faltan bytes", async () => {

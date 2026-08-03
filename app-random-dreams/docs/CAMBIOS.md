@@ -2,6 +2,31 @@
 
 Registro de cambios relevantes. Último primero.
 
+## 2026-08-03 — Optimización de latencia del flujo form → checkout (sin BD en el render)
+
+**Motivo:** la transición de la página de producto (formulario) al checkout tardaba ~1.35 s. No hay API externa en ese tramo: la demora era la **base de datos remota** (Supabase, región ca-central-1, ~190-200 ms de ida y vuelta por query) sumada a la cantidad de round trips en secuencia.
+
+**Qué cambió:**
+
+- `lib/services/orders.ts`:
+  - `createPendingOrder` pasó de una **transacción interactiva** (BEGIN + insert Order + insert FormSubmission + COMMIT ≈ 4 round trips, ~766 ms) a un **CTE en una sola query** (~202 ms) que inserta Order y FormSubmission juntos. Los ids se generan en JS con `randomUUID()`.
+  - `getCheckoutOrder` pasó de `findUnique` con 2 includes (≈ 2 round trips, ~384-1200 ms) a un **join directo en 1 query** (~203 ms). Se tipó el resultado con `CheckoutOrder` (solo los campos que usa la página).
+- `lib/services/products.ts`: caché en memoria **TTL 30 s** para `getProducts`/`getProductBySlug`/`getProductById` (el catálogo cambia poco; se evita re-leerlo en cada request, incluida la Server Action `createOrder`). `unstable_cache` no funciona dentro de Server Actions, por eso es un memo simple. Se agregó `clearProductCache()`.
+- `tests/unit/orders-service.test.ts`: tests actualizados a la nueva implementación (CTE en 1 query y join del checkout).
+
+**Medición (mediana, Supabase ca-central-1):**
+
+| Paso | Antes | Después |
+|---|---|---|
+| `getProductById` (en `createOrder`) | ~200 ms | ~0-203 ms (caché TTL) |
+| `createPendingOrder` | ~766 ms (4 RT) | ~202 ms (1 RT) |
+| `getCheckoutOrder` (página checkout) | ~384-1200 ms (2 RT) | ~203 ms (1 RT) |
+| **Total transición form → checkout** | **~1.35 s** | **~405-608 ms** |
+
+131 tests pasando, lint OK.
+
+**Pendiente:** la home y la página de producto todavía leen de la DB en cada navegación (siguiente paso: quitar la persistencia del flujo y guardar el pedido en memoria/URL).
+
 ## 2026-08-02 — Rediseño "Recuerdos de lo Inexistente" (tema oscuro + dorado)
 
 **Qué cambió:**

@@ -27,6 +27,7 @@
 - **Regla de capas**: las rutas/Server Actions NO contienen lógica de negocio; delegan en `lib/services`. El dominio no debe importar de Next.js (`next/*`).
 - **Server Components por defecto**: todo componente que no necesite interactividad debe ser Server Component. Marcar con `"use client"` solo cuando haya estado, eventos o hooks.
 - **Server Actions** para mutaciones del dominio (crear orden, enviar formulario); **Route Handlers** solo para integraciones externas (webhook de Inngest, callbacks de auth) y para **servir archivos generados** (preview y descarga vía `/api/resultado/[orderId]`, con la lógica de qué devolver delegada en `lib/services`).
+- **Nombres de archivo descargables**: `<slug-producto>-<valor-primer-campo-text>-<fecha>.ext` (slugify; fecha `YYYY-MM-DD` local al descargar; sin campo text, solo `<slug>-<fecha>`). Lo arma `buildResultFileName`/`getResultFileName` en `lib/services/generation.ts` leyendo `product.formSchema` + `formSubmission.formData`; extensión por formato (`txt`/`pdf`/`png`/`jpg`).
 - **Rendering**: SSG/ISR para Home y catálogo; SSR para formulario, checkout, generación y resultado (dinámicos por orden).
 - **Validación Zod** en todos los inputs (forms y handlers); los esquemas del formulario dinámico se derivan de `Product.formSchema` y se comparten entre cliente y servidor.
 
@@ -78,6 +79,7 @@
 - Tailwind CSS con **design tokens** definidos en la configuración; no hardcodear colores/espaciados en los componentes.
 - El design system vive en `components/` (Button, Input, Field, Card, StatusBadge, ResultViewer); los componentes de feature no reimplementan primitivas.
 - Imágenes con `next/image` (dimensiones y optimización obligatorias).
+- **Assets estáticos**: los archivos fuente viven en `assets/` y se copian a `public/` para servirse (logo → `public/assets/`, favicon → `public/favicon/`); no servir desde `assets/` directo. Favicon: reemplazar los íconos en `public/favicon/` + `site.webmanifest` y no volver a crear `app/favicon.ico` (Next le da prioridad sobre los metadata `icons`).
 
 ## Testing
 

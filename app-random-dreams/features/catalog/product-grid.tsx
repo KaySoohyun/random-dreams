@@ -1,7 +1,7 @@
-import type { ProductModel } from "@/lib/generated/prisma/models";
+import type { CatalogProduct } from "@/lib/data/products";
 import { ProductCard } from "./product-card";
 
-export function ProductGrid({ products }: { products: ProductModel[] }) {
+export function ProductGrid({ products }: { products: CatalogProduct[] }) {
   return (
     <section
       id="catalogo"

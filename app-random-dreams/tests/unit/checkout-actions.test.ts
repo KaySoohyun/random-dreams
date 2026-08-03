@@ -40,7 +40,7 @@ describe("confirmOrderAction", () => {
   it("notFound si la orden no existe", async () => {
     vi.mocked(confirmOrder).mockResolvedValue({ order: null, transitioned: false } as never);
 
-    const result = await catchResult(() => confirmOrderAction("ord_404", new FormData()));
+    const result = await catchResult(() => confirmOrderAction("ord_404", undefined, new FormData()));
 
     expect(result).toEqual({ ok: false, message: "NOT_FOUND" });
     expect(enqueueGeneration).not.toHaveBeenCalled();
@@ -52,7 +52,9 @@ describe("confirmOrderAction", () => {
       transitioned: true
     } as never);
 
-    const result = await catchResult(() => confirmOrderAction("ord_1", new FormData()));
+    const result = await catchResult(() =>
+      confirmOrderAction("ord_1", undefined, new FormData())
+    );
 
     expect(result).toEqual({ ok: false, message: "REDIRECT:/generacion/ord_1" });
     expect(enqueueGeneration).toHaveBeenCalledWith("ord_1");
@@ -64,9 +66,20 @@ describe("confirmOrderAction", () => {
       transitioned: false
     } as never);
 
-    const result = await catchResult(() => confirmOrderAction("ord_1", new FormData()));
+    const result = await catchResult(() =>
+      confirmOrderAction("ord_1", undefined, new FormData())
+    );
 
     expect(result).toEqual({ ok: false, message: "REDIRECT:/generacion/ord_1" });
+    expect(enqueueGeneration).not.toHaveBeenCalled();
+  });
+
+  it("devuelve el error sin redirigir si confirmOrder falla", async () => {
+    vi.mocked(confirmOrder).mockRejectedValue(new Error("db boom"));
+
+    const result = await confirmOrderAction("ord_1", undefined, new FormData());
+
+    expect(result).toEqual({ error: "db boom" });
     expect(enqueueGeneration).not.toHaveBeenCalled();
   });
 });

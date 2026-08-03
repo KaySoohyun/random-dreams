@@ -26,7 +26,12 @@ export default defineConfig({
       command: "npm run dev",
       url: "http://localhost:3000",
       reuseExistingServer: !isCI,
-      timeout: 180_000
+      timeout: 180_000,
+      env: {
+        ...process.env,
+        AI_MOCK: "true",
+        AI_IMAGE_OK: "true"
+      }
     }
   ]
 });

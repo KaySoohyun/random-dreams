@@ -35,7 +35,8 @@
   --color-night-panel: #0f151c;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-serif: var(--font-domine), Georgia, 'Times New Roman', serif;
+  --font-body: var(--font-faculty), Georgia, 'Times New Roman', serif;
 }
 
 @utility container-x {
@@ -150,7 +151,7 @@
 body {
   background-color: var(--color-surface);
   color: var(--color-ink);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-body);
   line-height: 1.5;
   min-height: 100vh;
 }

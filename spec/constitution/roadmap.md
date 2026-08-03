@@ -12,10 +12,17 @@ Orden y estado de las features. Es la vista de "qué hay hecho, qué toca ahora 
 6. **005 · Entrega de resultado** — `/generacion/[orderId]` con polling (`router.refresh()` cada 3 s), vista del resultado (texto + preview `next/image`) y descarga directa del `.txt` y la imagen vía `/api/resultado/[orderId]`; botón de reintento desde `ERROR` (resetea a `QUEUED` + `retryCount`). Spec: `features/005-entrega-resultado/`.
 7. **006 · Backend core** — Panel admin/soporte `/admin` con token (`ADMIN_TOKEN`): login con cookie de sesión firmada, dashboard con conteos, gestión de órdenes (listado/filtros/detalle) y trazabilidad `GenerationLog`, con reintento desde `ERROR`. Sin API REST (constitución). Spec: `features/006-backend-core/`.
 8. **007 · Testing y despliegue MVP** — E2E Playwright del flujo completo (storefront hasta descargas + panel admin + 404s) con Next dev + Inngest Dev Server y `AI_MOCK=true`; aserción no trivial en el smoke real; CI en GitHub Actions (lint/unit/build/smoke/e2e); `docs/despliegue-mvp.md` y `docs/qa-checklist-mvp.md`. **Desplegado en producción**: https://app-random-dreams.vercel.app, con **Inngest Cloud conectado** (`/api/inngest` autenticado). Spec: `features/007-testing-despliegue/`.
+9. **017 · Flujo sin base de datos** — Catálogo estático en código, pedido y resultado en memoria del servidor (Map con TTL), generación asíncrona en memoria con polling (sin Trigger.dev). Elimina la latencia de Supabase del flujo del usuario. Spec: `features/017-flujo-sin-base-de-datos/`.
 
 ## Siguiente 🔜
 
 _(MVP completo y en producción. **008 · Autenticación y cuenta** fue cancelada por decisión del usuario (2026-07-31): no se implementa auth por ahora; el MVP sigue tal cual.)_
+
+## Post-producción ✨
+
+_Tanda de pulido UX sobre el MVP desplegado: acabado visual y de robustez antes de encarar V1._
+
+1. **016 · Post-producción (pulido UX)** — Tipografía (Domine en títulos + Faculty Glyphic en cuerpo), aviso de pedido fallido en vez de mostrar el texto, aviso de imagen no disponible en vez de la imagen rota, nombres de archivo descargados con formato `<slug>-<campo-nombre>-<fecha>`, spinners y toasts propios (sin dependencias), y favicon de marca. Spec: `features/016-post-produccion/`.
 
 ## Backlog / ideas 💡
 

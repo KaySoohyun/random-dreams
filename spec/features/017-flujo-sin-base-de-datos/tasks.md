@@ -1,0 +1,25 @@
+# 017 · Flujo sin base de datos — Tasks
+
+**Estado:** implementada
+
+- [x] **1. Catálogo estático**
+  - [x] 1.1 Crear `lib/data/products.ts` con tipo `CatalogProduct` y los 6 productos (reuso de `prisma/seed-data.ts`), `id = slug`.
+  - [x] 1.2 Reescribir `lib/services/products.ts` para leer del catálogo estático (mismas firmas `getProducts`/`getProductBySlug`/`getProductById`).
+- [x] **2. Store en memoria**
+  - [x] 2.1 Crear `lib/store/orders.ts` con el Map global tipado, TTL por estado y limpieza.
+  - [x] 2.2 Implementar operaciones de pedido (`createPendingOrder`, `getCheckoutOrder`, `getOrderById`, `getOrderGeneration`, `getOrderForGeneration`, `confirmOrder`).
+  - [x] 2.3 Implementar operaciones de resultado (`setProcessing`, `saveText`, `saveImage`, `markCompleted`, `markError`, `retryGeneration`, `getResultText`, `getResultFile`, `logStep`).
+  - [x] 2.4 Resolver `product` desde el catálogo para que los objetos devueltos sigan teniendo `.product`/`.formSubmission`/`.generatedResult`.
+- [x] **3. Servicios**
+  - [x] 3.1 Reescribir `lib/services/orders.ts` delegando en el store.
+  - [x] 3.2 Reescribir `lib/services/generation.ts` delegando en el store.
+- [x] **4. Encolado**
+  - [x] 4.1 `trigger/events.ts`: `enqueueGeneration` hace fire-and-forget de `runGenerationInline` (sin Trigger.dev).
+- [x] **5. Tests**
+  - [x] 5.1 Reescribir `tests/unit/orders-service.test.ts` para el store en memoria.
+  - [x] 5.2 Reescribir `tests/unit/generation-service.test.ts` para el store en memoria.
+  - [x] 5.3 Revisar `scripts/smoke-pipeline.test.ts` y `scripts/smoke-admin.test.ts`.
+- [x] **6. Verificación**
+  - [x] 6.1 `npm test`, `npm run lint`, `npm run build` OK.
+  - [x] 6.2 Prueba manual del flujo completo en `next dev` sin BD disponible.
+  - [x] 6.3 Documentar en `docs/CAMBIOS.md` y actualizar `roadmap.md` (mover 017 a Hecho).

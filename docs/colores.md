@@ -48,6 +48,7 @@ Los tokens de uso general apuntan a esta paleta:
 
 ## Tipografía
 
-- Fuente general: **Georgia / serif** (titulares y cuerpo).
+- Fuente para títulos: **Domine** (serif) vía `--font-serif`; fallback Georgia.
+- Fuente para cuerpo: **Faculty Glyphic** vía `--font-body`; fallback Georgia.
 - Sans (Inter) disponible vía `--font-sans` para casos puntuales.
 - Estilo de marca: títulos en `uppercase` con `letter-spacing`.

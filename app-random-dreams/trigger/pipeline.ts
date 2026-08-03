@@ -13,7 +13,11 @@ import {
   setProcessing
 } from "@/lib/services/generation";
 
-async function runStep<T>(orderId: string, step: PipelineStep, fn: () => Promise<T>): Promise<T> {
+async function runStep<T>(
+  orderId: string,
+  step: PipelineStep,
+  fn: () => T | Promise<T>
+): Promise<T> {
   const start = Date.now();
   await logStep(orderId, step, "RUNNING");
   try {
@@ -57,8 +61,8 @@ export async function runGenerationPipeline(orderId: string) {
       Boolean(order.generatedResult.imageBytes)
     );
   } catch {
-    // La imagen falló pero el texto ya está listo: se mantiene COMPLETED y
-    // la página ofrece el botón para reintentar la imagen.
+    // La imagen falló pero el texto ya está listo: el pedido queda COMPLETED
+    // y la descarga de imagen aparece como "No disponible".
   }
 
   await runStep(orderId, "MARK_COMPLETED", () => markCompleted(orderId));
@@ -85,16 +89,4 @@ async function generateImageStep(
     const buffer = await getImageProvider().generate(imagePrompt);
     await saveImage(orderId, new Uint8Array(buffer));
   });
-}
-
-export async function runImageGenerationInline(orderId: string) {
-  const order = await getOrderForGeneration(orderId);
-  if (!order?.generatedResult) return;
-
-  await generateImageStep(
-    orderId,
-    order.product.aiPromptTemplate,
-    (order.formSubmission?.formData ?? {}) as Record<string, unknown>,
-    Boolean(order.generatedResult.imageBytes)
-  );
 }

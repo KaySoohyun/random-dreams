@@ -1,90 +1,53 @@
 import "server-only";
-import { prisma } from "@/lib/db/prisma";
-import { detectImageFormat, imageFileNameFor } from "@/lib/ai/image-format";
-import type {
-  PipelineStep,
-  PipelineStepStatus,
-  Prisma
-} from "@/lib/generated/prisma/client";
+import {
+  getOrderForGenerationInStore,
+  logStepInStore,
+  resetResultForRetry,
+  saveResultImage,
+  saveResultText,
+  setResultStatus,
+  type PipelineStep,
+  type PipelineStepStatus,
+  type StoredResult
+} from "@/lib/store/orders";
+import { detectImageFormat } from "@/lib/ai/image-format";
 
 export function getOrderForGeneration(orderId: string) {
-  return prisma.order.findUnique({
-    where: { id: orderId },
-    include: { product: true, formSubmission: true, generatedResult: true }
-  });
+  return getOrderForGenerationInStore(orderId);
 }
 
-export async function setProcessing(orderId: string) {
-  const existing = await prisma.generatedResult.findUnique({ where: { orderId } });
-  if (!existing) return null;
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: {
-      aiResponseStatus: "PROCESSING",
-      startedAt: existing.startedAt ?? new Date()
-    }
+export function setProcessing(orderId: string): StoredResult | null {
+  const order = getOrderForGenerationInStore(orderId);
+  if (!order?.generatedResult) return null;
+  setResultStatus(orderId, {
+    aiResponseStatus: "PROCESSING",
+    startedAt: order.generatedResult.startedAt ?? new Date()
   });
+  return order.generatedResult;
 }
 
-export function saveText(orderId: string, text: string) {
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: {
-      textContent: text,
-      textFileName: "resultado.txt"
-    }
-  });
+export function saveText(orderId: string, text: string): void {
+  saveResultText(orderId, text);
 }
 
-export function saveImage(orderId: string, imageBytes: Uint8Array) {
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: {
-      imageFileName: imageFileNameFor(imageBytes),
-      imageBytes: new Uint8Array(imageBytes),
-      imageFileUrl: null
-    }
-  });
+export function saveImage(orderId: string, imageBytes: Uint8Array): void {
+  saveResultImage(orderId, imageBytes);
 }
 
-export function markCompleted(orderId: string) {
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: { aiResponseStatus: "COMPLETED", completedAt: new Date() }
-  });
+export function markCompleted(orderId: string): void {
+  setResultStatus(orderId, { aiResponseStatus: "COMPLETED", completedAt: new Date() });
 }
 
-export function markError(orderId: string, message: string) {
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: { aiResponseStatus: "ERROR", error: message }
-  });
+export function markError(orderId: string, message: string): void {
+  setResultStatus(orderId, { aiResponseStatus: "ERROR", error: message });
 }
 
-export async function retryGeneration(orderId: string) {
-  const existing = await prisma.generatedResult.findUnique({ where: { orderId } });
-  if (!existing || existing.aiResponseStatus !== "ERROR") return null;
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: {
-      aiResponseStatus: "QUEUED",
-      error: null,
-      startedAt: null,
-      completedAt: null,
-      textFileName: null,
-      textContent: null,
-      textFileUrl: null,
-      imageFileName: null,
-      imageBytes: null,
-      imageFileUrl: null,
-      retryCount: { increment: 1 }
-    }
-  });
+export function retryGeneration(orderId: string): StoredResult | null {
+  return resetResultForRetry(orderId);
 }
 
-export async function getResultText(orderId: string): Promise<string | null> {
-  const result = await prisma.generatedResult.findUnique({ where: { orderId } });
-  return result?.textContent ?? null;
+export function getResultText(orderId: string): string | null {
+  return getOrderForGenerationInStore(orderId)?.generatedResult?.textContent ?? null;
 }
 
 export type ResultFile = {
@@ -94,18 +57,71 @@ export type ResultFile = {
   bytes?: Uint8Array;
 };
 
-export async function getResultFile(
+function slugify(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function buildResultFileName({
+  slug,
+  nameValue,
+  extension,
+  date = new Date()
+}: {
+  slug: string;
+  nameValue: string | null;
+  extension: string;
+  date?: Date;
+}): string {
+  const base = nameValue ? `${slug}-${slugify(nameValue)}` : slug;
+  return `${base}-${formatDate(date)}.${extension}`;
+}
+
+export function getResultFileName(
   orderId: string,
-  formato: "texto" | "imagen"
-): Promise<ResultFile> {
-  const result = await prisma.generatedResult.findUnique({ where: { orderId } });
+  extension: string,
+  date = new Date()
+): string | null {
+  const context = firstNameFieldValue(orderId);
+  return context ? buildResultFileName({ ...context, extension, date }) : null;
+}
+
+function firstNameFieldValue(
+  orderId: string
+): { slug: string; nameValue: string | null } | null {
+  const order = getOrderForGenerationInStore(orderId);
+  if (!order) return null;
+  const schema = order.product.formSchema as { fields?: Array<{ name: string; type: string }> };
+  const firstTextField = schema?.fields?.find((field) => field.type === "text");
+  const formData = order.formSubmission?.formData ?? {};
+  const raw = firstTextField ? formData[firstTextField.name] : undefined;
+  const nameValue = typeof raw === "string" && raw.trim() ? raw.trim() : null;
+  return { slug: order.product.slug, nameValue };
+}
+
+export function getResultFile(orderId: string, formato: "texto" | "imagen"): ResultFile {
+  const result = getOrderForGenerationInStore(orderId)?.generatedResult;
   if (!result) return { found: false };
+  const context = firstNameFieldValue(orderId);
 
   if (formato === "texto") {
     if (!result.textContent) return { found: false };
     return {
       found: true,
-      fileName: result.textFileName ?? "resultado.txt",
+      fileName: context
+        ? buildResultFileName({ ...context, extension: "txt" })
+        : "resultado.txt",
       contentType: "text/plain; charset=utf-8",
       bytes: new TextEncoder().encode(result.textContent)
     };
@@ -116,9 +132,12 @@ export async function getResultFile(
   const format = detectImageFormat(bytes);
   const contentType =
     format === "jpg" ? "image/jpeg" : format === "png" ? "image/png" : "application/octet-stream";
+  const fileName = context
+    ? buildResultFileName({ ...context, extension: format })
+    : `resultado.${format}`;
   return {
     found: true,
-    fileName: result.imageFileName ?? `resultado.${format}`,
+    fileName,
     contentType,
     bytes
   };
@@ -128,16 +147,7 @@ export function logStep(
   orderId: string,
   step: PipelineStep,
   status: PipelineStepStatus,
-  options?: { payload?: Prisma.InputJsonValue; error?: string; durationMs?: number }
-) {
-  return prisma.generationLog.create({
-    data: {
-      orderId,
-      step,
-      status,
-      payload: options?.payload,
-      error: options?.error,
-      durationMs: options?.durationMs
-    }
-  });
+  options?: { payload?: unknown; error?: string; durationMs?: number }
+): void {
+  logStepInStore(orderId, step, status, options);
 }

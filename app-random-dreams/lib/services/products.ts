@@ -1,17 +1,24 @@
 import "server-only";
-import { prisma } from "@/lib/db/prisma";
+import {
+  getProductByIdData,
+  getProductBySlugData,
+  getProductsData,
+  products,
+  type CatalogProduct
+} from "@/lib/data/products";
 
-export function getProducts() {
-  return prisma.product.findMany({
-    where: { active: true },
-    orderBy: { sortOrder: "asc" }
-  });
+export type { CatalogProduct } from "@/lib/data/products";
+
+export function getProducts(): CatalogProduct[] {
+  return getProductsData();
 }
 
-export function getProductBySlug(slug: string) {
-  return prisma.product.findUnique({ where: { slug } });
+export function getProductBySlug(slug: string): CatalogProduct | null {
+  return getProductBySlugData(slug);
 }
 
-export function getProductById(id: string) {
-  return prisma.product.findUnique({ where: { id } });
+export function getProductById(id: string): CatalogProduct | null {
+  return getProductByIdData(id);
 }
+
+export const allProducts = products;

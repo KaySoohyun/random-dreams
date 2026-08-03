@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getResultFile, getResultText } from "@/lib/services/generation";
+import { getResultFile, getResultFileName, getResultText } from "@/lib/services/generation";
 import { renderResultPdf } from "@/lib/pdf/markdown-pdf";
 
 export const runtime = "nodejs";
@@ -33,7 +33,10 @@ export async function GET(
     const pdfBytes = await renderResultPdf(text);
     const headers = new Headers();
     headers.set("Content-Type", "application/pdf");
-    headers.set("Content-Disposition", 'attachment; filename="resultado.pdf"');
+    headers.set(
+      "Content-Disposition",
+      `attachment; filename="${getResultFileName(orderId, "pdf") ?? "resultado.pdf"}"`
+    );
     headers.set("Cache-Control", "no-store");
     return new NextResponse(new Uint8Array(pdfBytes), { headers });
   }

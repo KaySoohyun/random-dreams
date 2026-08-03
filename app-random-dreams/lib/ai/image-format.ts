@@ -15,7 +15,3 @@ export function detectImageFormat(bytes: Uint8Array): ImageFormat {
   }
   return "bin";
 }
-
-export function imageFileNameFor(bytes: Uint8Array): string {
-  return `resultado.${detectImageFormat(bytes)}`;
-}

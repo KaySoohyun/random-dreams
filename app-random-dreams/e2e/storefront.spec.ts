@@ -57,23 +57,27 @@ test("flujo completo: catálogo → formulario → checkout → generación → 
   await expect(page).toHaveURL(new RegExp(`/generacion/${orderId}`));
 
   await expect(page.getByText("Completado")).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByText(/\[mock\] Texto generado/)).toBeVisible();
+  await expect(page.getByText(/\[mock\] El texto no se generó/)).toBeVisible();
   await expect(page.getByAltText(/Imagen generada/)).toBeVisible();
 
   const [textDownload] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("link", { name: "Descargar texto (.txt)" }).click()
+    page.getByRole("menuitem", { name: "Texto (.txt)" }).click()
   ]);
-  expect(textDownload.suggestedFilename()).toBe("resultado.txt");
+  expect(textDownload.suggestedFilename()).toMatch(
+    new RegExp(`^${product.slug}-sofia-\\d{4}-\\d{2}-\\d{2}\\.txt$`)
+  );
   const textPath = await textDownload.path();
   if (!textPath) throw new Error("No hay path para el .txt");
   expect(readFileSync(textPath, "utf8")).toContain("[mock]");
 
   const [imageDownload] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("link", { name: "Descargar imagen" }).click()
+    page.getByRole("menuitem", { name: "Imagen" }).click()
   ]);
-  expect(imageDownload.suggestedFilename()).toBe("resultado.png");
+  expect(imageDownload.suggestedFilename()).toMatch(
+    new RegExp(`^${product.slug}-sofia-\\d{4}-\\d{2}-\\d{2}\\.png$`)
+  );
   const imagePath = await imageDownload.path();
   if (!imagePath) throw new Error("No hay path para la imagen");
   const imageBytes = readFileSync(imagePath);
