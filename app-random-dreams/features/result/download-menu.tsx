@@ -90,12 +90,28 @@ const triggerClass =
 const itemClass =
   "flex w-full items-center gap-2.5 rounded-[2px] px-3 py-2 text-sm text-ink transition-colors hover:bg-mist hover:text-primary";
 
-export function DownloadMenu({ orderId, hasImage }: { orderId: string; hasImage: boolean }) {
+const itemDisabledClass =
+  "flex w-full items-center gap-2.5 rounded-[2px] px-3 py-2 text-sm text-faint/60 transition-colors";
+
+export function DownloadMenu({
+  orderId,
+  hasText,
+  hasImage
+}: {
+  orderId: string;
+  hasText: boolean;
+  hasImage: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const notifyDownload = () => toast("Descarga iniciada", "info");
+
+  const selectItem = () => {
+    setOpen(false);
+    notifyDownload();
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -132,49 +148,75 @@ export function DownloadMenu({ orderId, hasImage }: { orderId: string; hasImage:
           role="menu"
           className="absolute right-0 top-full z-20 mt-2 min-w-44 rounded-[4px] border border-primary/30 bg-night-panel p-1 shadow-lg"
         >
-          <a
-            href={`/api/resultado/${orderId}?formato=pdf&descarga=1`}
-            download
-            role="menuitem"
-            className={itemClass}
-            onClick={() => {
-              setOpen(false);
-              notifyDownload();
-            }}
-          >
-            <FilePdfIcon />
-            <span>PDF (.pdf)</span>
-          </a>
-          <a
-            href={`/api/resultado/${orderId}?formato=texto&descarga=1`}
-            download
-            role="menuitem"
-            className={itemClass}
-            onClick={() => {
-              setOpen(false);
-              notifyDownload();
-            }}
-          >
-            <FileTextIcon />
-            <span>Texto (.txt)</span>
-          </a>
-          {hasImage && (
-            <a
-              href={`/api/resultado/${orderId}?formato=imagen&descarga=1`}
-              download
-              role="menuitem"
-              className={itemClass}
-              onClick={() => {
-                setOpen(false);
-                notifyDownload();
-              }}
-            >
-              <ImageIcon />
-              <span>Imagen</span>
-            </a>
-          )}
+          <MenuItem
+            orderId={orderId}
+            formato="pdf"
+            icon={<FilePdfIcon />}
+            label="PDF (.pdf)"
+            disabled={!hasText}
+            onSelect={selectItem}
+          />
+          <MenuItem
+            orderId={orderId}
+            formato="texto"
+            icon={<FileTextIcon />}
+            label="Texto (.txt)"
+            disabled={!hasText}
+            onSelect={selectItem}
+          />
+          <MenuItem
+            orderId={orderId}
+            formato="imagen"
+            icon={<ImageIcon />}
+            label="Imagen"
+            disabled={!hasImage}
+            onSelect={selectItem}
+          />
         </div>
       )}
     </div>
+  );
+}
+
+function MenuItem({
+  orderId,
+  formato,
+  icon,
+  label,
+  disabled,
+  onSelect
+}: {
+  orderId: string;
+  formato: "pdf" | "texto" | "imagen";
+  icon: React.ReactNode;
+  label: string;
+  disabled: boolean;
+  onSelect: () => void;
+}) {
+  if (disabled) {
+    return (
+      <div
+        role="menuitem"
+        aria-disabled="true"
+        title="No disponible"
+        className={`${itemDisabledClass} cursor-not-allowed`}
+      >
+        {icon}
+        <span>{label}</span>
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href={`/api/resultado/${orderId}?formato=${formato}&descarga=1`}
+      download
+      role="menuitem"
+      className={itemClass}
+      onClick={onSelect}
+    >
+      {icon}
+      <span>{label}</span>
+    </a>
   );
 }

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { ProductModel } from "@/lib/generated/prisma/models";
+import type { CatalogProduct } from "@/lib/data/products";
 
-export function ProductCard({ product }: { product: ProductModel }) {
+export function ProductCard({ product }: { product: CatalogProduct }) {
   return (
     <article className="group relative flex h-[495px] w-full max-w-md flex-col overflow-hidden rounded-[4px] border border-primary/30 bg-night-card/60 transition-all duration-300 hover:-translate-y-1.5 hover:border-primary">
       <div className="relative  aspect-[3/4] max-w-full min-h-0 flex-1 overflow-hidden bg-mist">

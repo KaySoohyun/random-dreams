@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ProductCard } from "@/features/catalog/product-card";
-import type { ProductModel } from "@/lib/generated/prisma/models";
+import type { CatalogProduct } from "@/lib/data/products";
 
-const product: ProductModel = {
+const product: CatalogProduct = {
   id: "p1",
   slug: "souvenir-de-vida-paralela",
   name: "Souvenir de Vida Paralela",
@@ -14,9 +14,7 @@ const product: ProductModel = {
   aiPromptTemplate: "plantilla",
   imageUrl: null,
   active: true,
-  sortOrder: 1,
-  createdAt: new Date(),
-  updatedAt: new Date()
+  sortOrder: 1
 };
 
 describe("ProductCard", () => {

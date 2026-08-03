@@ -1,7 +1,11 @@
 import { expect, it } from "vitest";
-import { prisma } from "@/lib/db/prisma";
+import { products } from "@/lib/data/products";
 import { confirmOrder, createPendingOrder } from "@/lib/services/orders";
-import { getResultFile, retryGeneration } from "@/lib/services/generation";
+import {
+  getResultFile,
+  retryGeneration
+} from "@/lib/services/generation";
+import { getLogsForOrder } from "@/lib/store/orders";
 import { runGenerationPipeline } from "@/trigger/pipeline";
 
 it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
@@ -9,8 +13,8 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
     `Modo: ${process.env.AI_MOCK === "true" ? "AI_MOCK (sin llamadas reales)" : "proveedores REALES (Gemini + Hugging Face)"}`
   );
 
-  const product = await prisma.product.findFirst({ orderBy: { createdAt: "asc" } });
-  if (!product) throw new Error("No hay productos en la BD");
+  const product = products[0];
+  if (!product) throw new Error("No hay productos en el catálogo");
 
   const fields = (product.formSchema as { fields?: Array<Record<string, unknown>> }).fields ?? [];
   const formData: Record<string, unknown> = {};
@@ -30,49 +34,62 @@ it("smoke: pipeline IA end-to-end (mock o real según AI_MOCK)", async () => {
     if (!confirmed.order) throw new Error("confirmOrder devolvió order null");
     expect(confirmed.transitioned).toBe(true);
 
-    const before = await prisma.generationLog.count({ where: { orderId: order.id } });
+    const before = getLogsForOrder(order.id).length;
     await runGenerationPipeline(order.id);
 
-    const result = await prisma.generatedResult.findUnique({ where: { orderId: order.id } });
-    if (!result) throw new Error("No se creó GeneratedResult");
+    const result = order.id;
+    const generatedResult = confirmed.order.generatedResult;
+    if (!generatedResult) throw new Error("No se creó GeneratedResult");
 
-    expect(result.aiResponseStatus).toBe("COMPLETED");
-    expect(result.textContent).toBeTruthy();
+    expect(generatedResult.aiResponseStatus).toBe("COMPLETED");
+    expect(generatedResult.textContent).toBeTruthy();
     if (process.env.AI_MOCK === "true") {
-      expect(result.textContent).toContain("[mock]");
+      expect(generatedResult.textContent).toContain("[mock]");
     } else {
-      expect(result.textContent!.length).toBeGreaterThan(40);
+      expect(generatedResult.textContent!.length).toBeGreaterThan(40);
     }
-    expect(result.textFileName).toBe("resultado.txt");
-    console.log("textContent:", result.textContent.slice(0, 120), "…");
+    expect(generatedResult.textFileName).toBe("resultado.txt");
+    console.log("textContent:", generatedResult.textContent.slice(0, 120), "…");
 
-    expect(result.imageBytes?.length).toBeGreaterThan(0);
-    if (process.env.AI_MOCK === "true") {
-      expect(result.imageFileName).toBe("resultado.png");
+    if (process.env.AI_MOCK === "true" && process.env.AI_IMAGE_OK !== "true") {
+      expect(generatedResult.imageBytes).toBeNull();
+      const imageFile = await getResultFile(result, "imagen");
+      expect(imageFile.found).toBe(false);
+      console.log("imagen: no generada (mock sin AI_IMAGE_OK — aviso en la página)");
     } else {
-      expect(result.imageBytes!.length).toBeGreaterThan(1000);
+      expect(generatedResult.imageBytes?.length).toBeGreaterThan(0);
+      if (process.env.AI_MOCK === "true") {
+        expect(generatedResult.imageFileName).toBe("resultado.png");
+      } else {
+        expect(generatedResult.imageBytes!.length).toBeGreaterThan(1000);
+      }
+      console.log("imagen generada:", generatedResult.imageFileName, generatedResult.imageBytes?.length, "bytes");
     }
-    console.log("imagen generada:", result.imageFileName, result.imageBytes?.length, "bytes");
 
-    const after = await prisma.generationLog.count({ where: { orderId: order.id } });
+    const after = getLogsForOrder(result).length;
     expect(after - before).toBe(8);
 
-    const textFile = await getResultFile(order.id, "texto");
+    const textFile = await getResultFile(result, "texto");
     expect(textFile.found).toBe(true);
     expect(textFile.fileName).toBe("resultado.txt");
     expect(textFile.contentType).toBe("text/plain; charset=utf-8");
-    expect(textFile.bytes?.length).toBe(new TextEncoder().encode(result.textContent as string).length);
+    expect(textFile.bytes?.length).toBe(
+      new TextEncoder().encode(generatedResult.textContent as string).length
+    );
 
-    const imageFile = await getResultFile(order.id, "imagen");
-    expect(imageFile.found).toBe(true);
-    expect(imageFile.contentType).toBe(process.env.AI_MOCK === "true" ? "image/png" : "image/jpeg");
-    console.log("archivo texto:", textFile.fileName, "| imagen:", imageFile.fileName);
+    if (process.env.AI_MOCK !== "true" || process.env.AI_IMAGE_OK === "true") {
+      const imageFile = await getResultFile(result, "imagen");
+      expect(imageFile.found).toBe(true);
+      expect(imageFile.contentType).toBe(
+        process.env.AI_MOCK === "true" ? "image/png" : "image/jpeg"
+      );
+      console.log("archivo texto:", textFile.fileName, "| imagen:", imageFile.fileName);
+    } else {
+      console.log("archivo texto:", textFile.fileName);
+    }
 
-    expect(await retryGeneration(order.id)).toBeNull();
+    expect(await retryGeneration(result)).toBeNull();
   } finally {
-    await prisma.generationLog.deleteMany({ where: { orderId: order.id } });
-    await prisma.generatedResult.deleteMany({ where: { orderId: order.id } });
-    await prisma.formSubmission.deleteMany({ where: { orderId: order.id } });
-    await prisma.order.delete({ where: { id: order.id } });
+    // El store se limpia solo por TTL; no hay BD que limpiar.
   }
 });

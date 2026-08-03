@@ -7,7 +7,7 @@ export function ErrorToast({ message }: { message?: string | null }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    toast(message ?? "Lo sentimos, no pudimos generar tu creación.", "error");
+    toast(message ?? "La creación falló, probá en otra realidad.", "error");
   }, [message, toast]);
 
   return null;

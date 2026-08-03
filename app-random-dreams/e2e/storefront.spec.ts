@@ -57,12 +57,12 @@ test("flujo completo: catálogo → formulario → checkout → generación → 
   await expect(page).toHaveURL(new RegExp(`/generacion/${orderId}`));
 
   await expect(page.getByText("Completado")).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByText(/\[mock\] Texto generado/)).toBeVisible();
+  await expect(page.getByText(/\[mock\] El texto no se generó/)).toBeVisible();
   await expect(page.getByAltText(/Imagen generada/)).toBeVisible();
 
   const [textDownload] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("link", { name: "Descargar texto (.txt)" }).click()
+    page.getByRole("menuitem", { name: "Texto (.txt)" }).click()
   ]);
   expect(textDownload.suggestedFilename()).toBe("resultado.txt");
   const textPath = await textDownload.path();
@@ -71,7 +71,7 @@ test("flujo completo: catálogo → formulario → checkout → generación → 
 
   const [imageDownload] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("link", { name: "Descargar imagen" }).click()
+    page.getByRole("menuitem", { name: "Imagen" }).click()
   ]);
   expect(imageDownload.suggestedFilename()).toBe("resultado.png");
   const imagePath = await imageDownload.path();

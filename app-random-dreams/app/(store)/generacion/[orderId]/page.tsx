@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getOrderGeneration } from "@/lib/services/orders";
-import { generateImageAction, retryGenerationAction } from "@/features/result/actions";
+import { retryGenerationAction } from "@/features/result/actions";
 import { AutoRefresh } from "@/features/result/auto-refresh";
-import { ImageGenerateForm } from "@/features/result/image-generate-form";
+import { ImageUnavailable, ResultImage } from "@/features/result/result-image";
 import { RetryForm } from "@/features/result/retry-form";
 import { DownloadMenu } from "@/features/result/download-menu";
 import { ErrorToast } from "@/features/result/error-toast";
@@ -42,7 +41,6 @@ export default async function GenerationPage({
   const status = generatedResult.aiResponseStatus;
   const isTerminal = status === "COMPLETED" || status === "ERROR";
   const retryAction = retryGenerationAction.bind(null, orderId);
-  const imageAction = generateImageAction.bind(null, orderId);
 
   return (
     <div className="container-x max-w-4xl py-10">
@@ -63,54 +61,36 @@ export default async function GenerationPage({
               Estado: <span className="font-medium text-ink">{statusLabel[status] ?? status}</span>
             </span>
             {status === "COMPLETED" && generatedResult.textContent && (
-              <DownloadMenu orderId={orderId} hasImage={!!generatedResult.imageBytes} />
+              <DownloadMenu
+                orderId={orderId}
+                hasText={!!generatedResult.textContent}
+                hasImage={!!generatedResult.imageBytes}
+              />
             )}
           </div>
         </div>
 
         {status === "COMPLETED" && generatedResult.textContent ? (
           <>
-            <div
-              className={
-                generatedResult.imageBytes
-                  ? "mt-6 grid items-start gap-6 md:grid-cols-2"
-                  : "mt-6"
-              }
-            >
-
+            <div className="mt-6 grid items-start gap-6 md:grid-cols-2">
               <div className="markdown-body rounded-lg border border-line bg-mist p-4">
                 <ReactMarkdown>{generatedResult.textContent}</ReactMarkdown>
               </div>
 
-
               {generatedResult.imageBytes ? (
-                <div className="relative aspect-[4/3] rounded-lg border border-line overflow-hidden bg-mist">
-                  <Image
-                    src={`/api/resultado/${orderId}?formato=imagen`}
-                    alt={`Imagen generada para ${order.product.name}`}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, 512px"
-                  />
-                </div>
-              ) : null}
+                <ResultImage
+                  src={`/api/resultado/${orderId}?formato=imagen`}
+                  alt={`Imagen generada para ${order.product.name}`}
+                />
+              ) : (
+                <ImageUnavailable />
+              )}
             </div>
-
-            {!generatedResult.imageBytes && (
-              <>
-                <p className="text-sm text-muted mt-6">
-                  ¿Querés que además generemos una imagen para tu creación?
-                </p>
-                <div className="mt-4">
-                  <ImageGenerateForm action={imageAction} />
-                </div>
-              </>
-            )}
           </>
         ) : status === "ERROR" ? (
           <>
             <p className="text-sm text-muted mt-5">
-              Lo sentimos, no pudimos generar tu creación.
+              La creación falló, probá en otra realidad.
             </p>
             {generatedResult.error && (
               <p className="text-sm text-danger mt-2">{generatedResult.error}</p>

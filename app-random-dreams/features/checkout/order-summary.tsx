@@ -4,7 +4,7 @@ import type { Prisma } from "@/lib/generated/prisma/client";
 type OrderSummaryProps = {
   productName: string;
   formSchema: FormSchema;
-  formData: Prisma.JsonValue | undefined;
+  formData: Prisma.JsonValue | Record<string, unknown> | null | undefined;
 };
 
 function formatValue(field: FormSchema["fields"][number], value: unknown): string {
@@ -14,7 +14,7 @@ function formatValue(field: FormSchema["fields"][number], value: unknown): strin
 }
 
 export function OrderSummary({ productName, formSchema, formData }: OrderSummaryProps) {
-  const data = formData as Record<string, unknown>;
+  const data = (formData ?? {}) as Record<string, unknown>;
   return (
     <div className="rounded-[4px] border border-primary/30 bg-night-card/60 p-6">
       <h2 className="font-serif text-sm uppercase tracking-[1.5px] text-ink">{productName}</h2>

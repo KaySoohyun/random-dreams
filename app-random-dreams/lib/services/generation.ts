@@ -1,90 +1,53 @@
 import "server-only";
-import { prisma } from "@/lib/db/prisma";
-import { detectImageFormat, imageFileNameFor } from "@/lib/ai/image-format";
-import type {
-  PipelineStep,
-  PipelineStepStatus,
-  Prisma
-} from "@/lib/generated/prisma/client";
+import {
+  getOrderForGenerationInStore,
+  logStepInStore,
+  resetResultForRetry,
+  saveResultImage,
+  saveResultText,
+  setResultStatus,
+  type PipelineStep,
+  type PipelineStepStatus,
+  type StoredResult
+} from "@/lib/store/orders";
+import { detectImageFormat } from "@/lib/ai/image-format";
 
 export function getOrderForGeneration(orderId: string) {
-  return prisma.order.findUnique({
-    where: { id: orderId },
-    include: { product: true, formSubmission: true, generatedResult: true }
-  });
+  return getOrderForGenerationInStore(orderId);
 }
 
-export async function setProcessing(orderId: string) {
-  const existing = await prisma.generatedResult.findUnique({ where: { orderId } });
-  if (!existing) return null;
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: {
-      aiResponseStatus: "PROCESSING",
-      startedAt: existing.startedAt ?? new Date()
-    }
+export function setProcessing(orderId: string): StoredResult | null {
+  const order = getOrderForGenerationInStore(orderId);
+  if (!order?.generatedResult) return null;
+  setResultStatus(orderId, {
+    aiResponseStatus: "PROCESSING",
+    startedAt: order.generatedResult.startedAt ?? new Date()
   });
+  return order.generatedResult;
 }
 
-export function saveText(orderId: string, text: string) {
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: {
-      textContent: text,
-      textFileName: "resultado.txt"
-    }
-  });
+export function saveText(orderId: string, text: string): void {
+  saveResultText(orderId, text);
 }
 
-export function saveImage(orderId: string, imageBytes: Uint8Array) {
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: {
-      imageFileName: imageFileNameFor(imageBytes),
-      imageBytes: new Uint8Array(imageBytes),
-      imageFileUrl: null
-    }
-  });
+export function saveImage(orderId: string, imageBytes: Uint8Array): void {
+  saveResultImage(orderId, imageBytes);
 }
 
-export function markCompleted(orderId: string) {
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: { aiResponseStatus: "COMPLETED", completedAt: new Date() }
-  });
+export function markCompleted(orderId: string): void {
+  setResultStatus(orderId, { aiResponseStatus: "COMPLETED", completedAt: new Date() });
 }
 
-export function markError(orderId: string, message: string) {
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: { aiResponseStatus: "ERROR", error: message }
-  });
+export function markError(orderId: string, message: string): void {
+  setResultStatus(orderId, { aiResponseStatus: "ERROR", error: message });
 }
 
-export async function retryGeneration(orderId: string) {
-  const existing = await prisma.generatedResult.findUnique({ where: { orderId } });
-  if (!existing || existing.aiResponseStatus !== "ERROR") return null;
-  return prisma.generatedResult.update({
-    where: { orderId },
-    data: {
-      aiResponseStatus: "QUEUED",
-      error: null,
-      startedAt: null,
-      completedAt: null,
-      textFileName: null,
-      textContent: null,
-      textFileUrl: null,
-      imageFileName: null,
-      imageBytes: null,
-      imageFileUrl: null,
-      retryCount: { increment: 1 }
-    }
-  });
+export function retryGeneration(orderId: string): StoredResult | null {
+  return resetResultForRetry(orderId);
 }
 
-export async function getResultText(orderId: string): Promise<string | null> {
-  const result = await prisma.generatedResult.findUnique({ where: { orderId } });
-  return result?.textContent ?? null;
+export function getResultText(orderId: string): string | null {
+  return getOrderForGenerationInStore(orderId)?.generatedResult?.textContent ?? null;
 }
 
 export type ResultFile = {
@@ -94,11 +57,8 @@ export type ResultFile = {
   bytes?: Uint8Array;
 };
 
-export async function getResultFile(
-  orderId: string,
-  formato: "texto" | "imagen"
-): Promise<ResultFile> {
-  const result = await prisma.generatedResult.findUnique({ where: { orderId } });
+export function getResultFile(orderId: string, formato: "texto" | "imagen"): ResultFile {
+  const result = getOrderForGenerationInStore(orderId)?.generatedResult;
   if (!result) return { found: false };
 
   if (formato === "texto") {
@@ -128,16 +88,7 @@ export function logStep(
   orderId: string,
   step: PipelineStep,
   status: PipelineStepStatus,
-  options?: { payload?: Prisma.InputJsonValue; error?: string; durationMs?: number }
-) {
-  return prisma.generationLog.create({
-    data: {
-      orderId,
-      step,
-      status,
-      payload: options?.payload,
-      error: options?.error,
-      durationMs: options?.durationMs
-    }
-  });
+  options?: { payload?: unknown; error?: string; durationMs?: number }
+): void {
+  logStepInStore(orderId, step, status, options);
 }

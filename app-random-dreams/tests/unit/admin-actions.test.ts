@@ -27,8 +27,7 @@ vi.mock("@/trigger/pipeline", () => ({
 }));
 
 vi.mock("@/trigger/events", () => ({
-  enqueueGeneration: vi.fn().mockResolvedValue(undefined),
-  sendOrderConfirmed: vi.fn().mockResolvedValue(undefined)
+  enqueueGeneration: vi.fn().mockResolvedValue(undefined)
 }));
 
 import {

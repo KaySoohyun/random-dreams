@@ -10,17 +10,12 @@ vi.mock("@/lib/services/generation", () => ({
   retryGeneration: vi.fn()
 }));
 
-vi.mock("@/trigger/pipeline", () => ({
-  runImageGenerationInline: vi.fn()
-}));
-
 vi.mock("@/trigger/events", () => ({
   enqueueGeneration: vi.fn().mockResolvedValue(undefined)
 }));
 
-import { generateImageAction, retryGenerationAction } from "@/features/result/actions";
+import { retryGenerationAction } from "@/features/result/actions";
 import { retryGeneration } from "@/lib/services/generation";
-import { runImageGenerationInline } from "@/trigger/pipeline";
 import { enqueueGeneration } from "@/trigger/events";
 
 function catchResult(fn: () => Promise<unknown>): { ok: true } | { ok: false; message: string } {
@@ -75,37 +70,6 @@ describe("retryGenerationAction", () => {
     vi.mocked(retryGeneration).mockRejectedValue("algo salió mal");
 
     const result = await retryGenerationAction("ord_1", undefined, new FormData());
-
-    expect(result).toEqual({ error: "algo salió mal" });
-  });
-});
-
-describe("generateImageAction", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("genera la imagen en línea y redirige", async () => {
-    vi.mocked(runImageGenerationInline).mockResolvedValue(undefined as never);
-
-    const result = await catchResult(() => generateImageAction("ord_1", undefined, new FormData()));
-
-    expect(result).toEqual({ ok: false, message: "REDIRECT:/generacion/ord_1" });
-    expect(runImageGenerationInline).toHaveBeenCalledWith("ord_1");
-  });
-
-  it("devuelve el error sin redirigir si la generación falla", async () => {
-    vi.mocked(runImageGenerationInline).mockRejectedValue(new Error("imagen boom"));
-
-    const result = await generateImageAction("ord_1", undefined, new FormData());
-
-    expect(result).toEqual({ error: "imagen boom" });
-  });
-
-  it("convierte errores no-Error a string", async () => {
-    vi.mocked(runImageGenerationInline).mockRejectedValue("algo salió mal");
-
-    const result = await generateImageAction("ord_1", undefined, new FormData());
 
     expect(result).toEqual({ error: "algo salió mal" });
   });
