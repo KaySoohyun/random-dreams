@@ -92,9 +92,6 @@ export default async function GenerationPage({
             <p className="text-sm text-muted mt-5">
               La creación falló, probá en otra realidad.
             </p>
-            {generatedResult.error && (
-              <p className="text-sm text-danger mt-2">{generatedResult.error}</p>
-            )}
             <div className="mt-6">
               <RetryForm action={retryAction} />
             </div>
@@ -113,7 +110,7 @@ export default async function GenerationPage({
         )}
       </div>
 
-      {status === "ERROR" && <ErrorToast message={generatedResult.error} />}
+      {status === "ERROR" && <ErrorToast />}
       {!isTerminal && <AutoRefresh status={status} />}
     </div>
   );

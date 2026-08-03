@@ -2,6 +2,8 @@
 
 ## 2026-08-03
 
+- **No exponer errores crudos del backend (016/017)** — Cuando la generación o el reintento fallan, el usuario ya no ve la respuesta cruda del backend (antes aparecía en rojo en la página, en el toast de error y en el `RetryForm`). Ahora solo ve mensajes amigables: "La creación falló, probá en otra realidad." (página + `ErrorToast`) y "No se pudo reintentar, probá en otra realidad." (`RetryForm`, texto en `text-muted` en vez de `text-danger`). `ErrorToast` dejó de recibir `message`.
+
 - **Mensaje para pedido no persistente (017)** — Al entrar por URL a un pedido que ya no está en memoria (`/generacion/[orderId]` o `/checkout/[orderId]` con order inexistente), en vez de 404 se muestra un aviso amigable **"Este pedido ya fue triturado"** con botón "Ir al catálogo" (`features/result/order-not-found.tsx`). Se reemplazó el `notFound()` de ambas páginas; e2e actualizado (espera el aviso en vez del 404). El admin sigue con 404 real (lee de la BD, no del store en memoria).
 
 - **Logo en el PDF (016)** — El PDF descargable (`/api/resultado/[orderId]?formato=pdf`) ahora lleva el logo `public/assets/logo_pdf.png` como **header arriba del contenido** (centrado, línea dorada inferior). `lib/pdf/markdown-pdf.tsx`: `readLogoDataUri` lee el archivo en build/runtime y lo incrusta como data URI; si falta, genera el PDF sin logo (no rompe). Fuente en `assets/logo_pdf.png`, copiada a `public/assets/`.

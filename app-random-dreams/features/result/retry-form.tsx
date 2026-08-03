@@ -34,12 +34,14 @@ export function RetryForm({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (state?.error) toast(state.error, "error");
+    if (state?.error) toast("No se pudo reintentar, probá en otra realidad.", "error");
   }, [state?.error, toast]);
 
   return (
     <form action={formAction} className="space-y-3">
-      {state?.error && <p className="text-sm text-danger">{state.error}</p>}
+      {state?.error && (
+        <p className="text-sm text-muted">No se pudo reintentar, probá en otra realidad.</p>
+      )}
       <RetryButton />
     </form>
   );
