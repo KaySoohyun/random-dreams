@@ -253,6 +253,8 @@ export type GenerationOrderView = {
   productId: string;
   paymentStatus: PaymentStatus;
   product: Pick<CatalogProduct, "id" | "slug" | "name">;
+  formSchema: CatalogProduct["formSchema"] | null;
+  formData: Record<string, unknown> | null;
   generatedResult: StoredResult | null;
 };
 
@@ -312,6 +314,8 @@ export function getOrderGenerationInStore(id: string): GenerationOrderView | nul
     productId: order.productId,
     paymentStatus: order.paymentStatus,
     product: { id: product.id, slug: product.slug, name: product.name },
+    formSchema: product.formSchema,
+    formData: order.formData,
     generatedResult: order.result
   };
 }

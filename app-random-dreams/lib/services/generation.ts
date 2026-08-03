@@ -73,6 +73,29 @@ function formatDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export function firstNameValue(
+  formSchema: unknown,
+  formData: Record<string, unknown> | null
+): string | null {
+  const schema = formSchema as { fields?: Array<{ name: string; type: string }> } | null;
+  const firstTextField = schema?.fields?.find((field) => field.type === "text");
+  const raw = firstTextField && formData ? formData[firstTextField.name] : undefined;
+  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
+}
+
+export function buildResultBaseName({
+  slug,
+  nameValue,
+  date = new Date()
+}: {
+  slug: string;
+  nameValue: string | null;
+  date?: Date;
+}): string {
+  const base = nameValue ? `${slug}-${slugify(nameValue)}` : slug;
+  return `${base}-${formatDate(date)}`;
+}
+
 export function buildResultFileName({
   slug,
   nameValue,
@@ -84,8 +107,7 @@ export function buildResultFileName({
   extension: string;
   date?: Date;
 }): string {
-  const base = nameValue ? `${slug}-${slugify(nameValue)}` : slug;
-  return `${base}-${formatDate(date)}.${extension}`;
+  return `${buildResultBaseName({ slug, nameValue, date })}.${extension}`;
 }
 
 export function getResultFileName(
@@ -102,11 +124,10 @@ function firstNameFieldValue(
 ): { slug: string; nameValue: string | null } | null {
   const order = getOrderForGenerationInStore(orderId);
   if (!order) return null;
-  const schema = order.product.formSchema as { fields?: Array<{ name: string; type: string }> };
-  const firstTextField = schema?.fields?.find((field) => field.type === "text");
-  const formData = order.formSubmission?.formData ?? {};
-  const raw = firstTextField ? formData[firstTextField.name] : undefined;
-  const nameValue = typeof raw === "string" && raw.trim() ? raw.trim() : null;
+  const nameValue = firstNameValue(
+    order.product.formSchema,
+    order.formSubmission?.formData ?? null
+  );
   return { slug: order.product.slug, nameValue };
 }
 

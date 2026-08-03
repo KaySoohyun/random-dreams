@@ -2,6 +2,26 @@
 
 Registro de cambios relevantes. Último primero.
 
+## 2026-08-03 — Descarga de resultados 100% client-side (sin API JSON)
+
+**Motivo:** la descarga de resultados abría `/api/resultado/[orderId]`, que devolvía `{ error: "Resultado no encontrado" }` (JSON 404) cuando el request caía en una instancia serverless fría sin el resultado en memoria. El navegador lo descargaba como archivo `.json`. La generación no usa BD (feature 017), así que el resultado vive solo en la instancia que lo generó.
+
+**Qué cambió:**
+
+- `lib/pdf/result-document.tsx` (nuevo): componente de documento PDF (`ResultDocument`) **compartido server/client**, sin `server-only` ni acceso al filesystem. Reusa `parseMarkdown` de `lib/pdf/markdown.ts` (heading 1-3, párrafo, listas, blockquote, código, hr, inline bold/italic/code).
+- `lib/pdf/client-pdf.tsx` (nuevo): `renderResultPdfClient(markdown) → Promise<Blob>` con `pdf(<ResultDocument …/>).toBlob()` (genera el PDF en el navegador).
+- `lib/pdf/markdown-pdf.tsx`: refactorizado a wrapper server-only (`readLogoDataUri` de `public/assets/logo_pdf.png`; `renderResultPdf` reusa `ResultDocument` con logo).
+- `lib/ai/image-format.ts`: `imageBytesToDataUrl(bytes)` convierte los bytes de la imagen en `data:<mime>;base64,…` para la página y las descargas.
+- `lib/services/generation.ts`: helpers puros de nombres de archivo `firstNameValue(formSchema, formData)` y `buildResultBaseName({slug, nameValue, date?})` (formato fecha `YYYY-MM-DD`, slugify NFD); `buildResultFileName` y `getResultFileName` los reusan.
+- `lib/store/orders.ts`: `GenerationOrderView` ahora incluye `formSchema` y `formData` (para que la página derive el nombre del archivo sin llamar al API).
+- `features/result/download-menu.tsx`: recibe `textContent`, `imageDataUrl` y `fileNameBase` por props; los botones PDF/Texto/Imagen disparan descargas client-side (PDF vía dynamic import de `renderResultPdfClient`, Texto/Imagen con `Blob` + `<a download>`).
+- `app/(store)/generacion/[orderId]/page.tsx`: renderiza la imagen desde `imageBytesToDataUrl` (ya no depende del endpoint) y pasa el contenido y el nombre base al menú de descargas.
+- Tests: `tests/unit/download-menu.test.tsx` migrado al nuevo API de props; `tests/unit/client-pdf.test.ts` (nuevo) verifica que `renderResultPdfClient` genera un Blob `%PDF`.
+
+150 tests pasando, lint OK, build OK.
+
+**Pendiente:** el endpoint `/api/resultado/[orderId]` se mantiene para `Content-Disposition` legacy y la vista previa, pero el flujo principal de descarga ya no depende de él.
+
 ## 2026-08-03 — Pedidos recuperables entre instancias serverless (cookie firmada)
 
 **Motivo:** en producción, un pedido recién creado a veces mostraba "Este pedido ya fue triturado" al navegar a su URL. La causa: el store en memoria de la feature 017 (`globalForStore`) solo se comparte entre requests en desarrollo; en producción **cada instancia serverless tiene su propio `Map`**, así que el pedido se perdía al cambiar de instancia o tras un cold start.

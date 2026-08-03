@@ -4,10 +4,14 @@ import userEvent from "@testing-library/user-event";
 import { ToastProvider } from "@/components/ui/toast";
 import { DownloadMenu } from "@/features/result/download-menu";
 
-async function openMenu(hasText: boolean, hasImage: boolean) {
+async function openMenu(textContent: string | null, imageDataUrl: string | null) {
   render(
     <ToastProvider>
-      <DownloadMenu orderId="ord_1" hasText={hasText} hasImage={hasImage} />
+      <DownloadMenu
+        textContent={textContent}
+        imageDataUrl={imageDataUrl}
+        fileNameBase="criatura-fantastica-sofia-2026-08-03"
+      />
     </ToastProvider>
   );
   await userEvent.click(screen.getByRole("button", { name: "Descargar resultado" }));
@@ -15,7 +19,7 @@ async function openMenu(hasText: boolean, hasImage: boolean) {
 
 describe("DownloadMenu", () => {
   it("muestra siempre los 3 items (PDF, Texto, Imagen) en el menú", async () => {
-    await openMenu(true, true);
+    await openMenu("texto", "data:image/png;base64,AAAA");
 
     expect(screen.getByRole("menuitem", { name: "PDF (.pdf)" })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "Texto (.txt)" })).toBeTruthy();
@@ -23,7 +27,7 @@ describe("DownloadMenu", () => {
   });
 
   it("deshabilita con tooltip 'No disponible' los items sin contenido", async () => {
-    await openMenu(true, false);
+    await openMenu("texto", null);
 
     const pdf = screen.getByRole("menuitem", { name: "PDF (.pdf)" });
     const texto = screen.getByRole("menuitem", { name: "Texto (.txt)" });
@@ -36,7 +40,7 @@ describe("DownloadMenu", () => {
   });
 
   it("deshabilita PDF y Texto si no hay texto, e Imagen si no hay imagen", async () => {
-    await openMenu(false, false);
+    await openMenu(null, null);
 
     expect(screen.getByRole("menuitem", { name: "PDF (.pdf)" }).getAttribute("aria-disabled")).toBe(
       "true"

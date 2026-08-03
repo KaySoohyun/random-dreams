@@ -11,6 +11,8 @@ import { RetryForm } from "@/features/result/retry-form";
 import { DownloadMenu } from "@/features/result/download-menu";
 import { ErrorToast } from "@/features/result/error-toast";
 import { Spinner } from "@/components/ui/spinner";
+import { imageBytesToDataUrl } from "@/lib/ai/image-format";
+import { buildResultBaseName, firstNameValue } from "@/lib/services/generation";
 
 export async function generateMetadata({
   params
@@ -44,6 +46,14 @@ export default async function GenerationPage({
   const isTerminal = status === "COMPLETED" || status === "ERROR";
   const retryAction = retryGenerationAction.bind(null, orderId);
 
+  const imageDataUrl = generatedResult.imageBytes
+    ? imageBytesToDataUrl(new Uint8Array(generatedResult.imageBytes))
+    : null;
+  const fileNameBase = buildResultBaseName({
+    slug: order.product.slug,
+    nameValue: firstNameValue(order.formSchema, order.formData)
+  });
+
   return (
     <div className="container-x max-w-4xl py-10">
       <Link href="/" className="text-sm text-muted hover:text-ink">
@@ -64,9 +74,9 @@ export default async function GenerationPage({
             </span>
             {status === "COMPLETED" && generatedResult.textContent && (
               <DownloadMenu
-                orderId={orderId}
-                hasText={!!generatedResult.textContent}
-                hasImage={!!generatedResult.imageBytes}
+                textContent={generatedResult.textContent}
+                imageDataUrl={imageDataUrl}
+                fileNameBase={fileNameBase}
               />
             )}
           </div>
@@ -81,7 +91,7 @@ export default async function GenerationPage({
 
               {generatedResult.imageBytes ? (
                 <ResultImage
-                  src={`/api/resultado/${orderId}?formato=imagen`}
+                  src={imageDataUrl ?? ""}
                   alt={`Imagen generada para ${order.product.name}`}
                 />
               ) : (

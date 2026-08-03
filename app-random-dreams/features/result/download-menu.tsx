@@ -94,24 +94,50 @@ const itemDisabledClass =
   "flex w-full items-center gap-2.5 rounded-[2px] px-3 py-2 text-sm text-faint/60 transition-colors";
 
 export function DownloadMenu({
-  orderId,
-  hasText,
-  hasImage
+  textContent,
+  imageDataUrl,
+  fileNameBase
 }: {
-  orderId: string;
-  hasText: boolean;
-  hasImage: boolean;
+  textContent: string | null;
+  imageDataUrl: string | null;
+  fileNameBase: string;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const notifyDownload = () => toast("Descarga iniciada", "info");
+  const hasText = Boolean(textContent);
+  const hasImage = Boolean(imageDataUrl);
 
-  const selectItem = () => {
+  const notifyDownload = (name: string) => toast(`Descarga iniciada: ${name}`, "info");
+
+  const downloadText = () => {
+    if (!textContent) return;
+    const blob = new Blob([textContent], { type: "text/plain;charset=utf-8" });
+    triggerDownload(blob, `${fileNameBase}.txt`);
     setOpen(false);
-    notifyDownload();
+    notifyDownload(`${fileNameBase}.txt`);
   };
+
+  const downloadPdf = async () => {
+    if (!textContent) return;
+    const { renderResultPdfClient } = await import("@/lib/pdf/client-pdf");
+    const blob = await renderResultPdfClient(textContent);
+    triggerDownload(blob, `${fileNameBase}.pdf`);
+    setOpen(false);
+    notifyDownload(`${fileNameBase}.pdf`);
+  };
+
+  const downloadImage = async () => {
+    if (!imageDataUrl) return;
+    const extension = imageDataUrl.startsWith("data:image/png") ? "png" : "jpg";
+    const blob = await (await fetch(imageDataUrl)).blob();
+    triggerDownload(blob, `${fileNameBase}.${extension}`);
+    setOpen(false);
+    notifyDownload(`${fileNameBase}.${extension}`);
+  };
+
+  const selectItem = (handler: () => void) => () => void handler();
 
   useEffect(() => {
     if (!open) return;
@@ -149,28 +175,22 @@ export function DownloadMenu({
           className="absolute right-0 top-full z-20 mt-2 min-w-44 rounded-[4px] border border-primary/30 bg-night-panel p-1 shadow-lg"
         >
           <MenuItem
-            orderId={orderId}
-            formato="pdf"
             icon={<FilePdfIcon />}
             label="PDF (.pdf)"
             disabled={!hasText}
-            onSelect={selectItem}
+            onSelect={selectItem(downloadPdf)}
           />
           <MenuItem
-            orderId={orderId}
-            formato="texto"
             icon={<FileTextIcon />}
             label="Texto (.txt)"
             disabled={!hasText}
-            onSelect={selectItem}
+            onSelect={selectItem(downloadText)}
           />
           <MenuItem
-            orderId={orderId}
-            formato="imagen"
             icon={<ImageIcon />}
             label="Imagen"
             disabled={!hasImage}
-            onSelect={selectItem}
+            onSelect={selectItem(downloadImage)}
           />
         </div>
       )}
@@ -178,16 +198,23 @@ export function DownloadMenu({
   );
 }
 
+function triggerDownload(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
 function MenuItem({
-  orderId,
-  formato,
   icon,
   label,
   disabled,
   onSelect
 }: {
-  orderId: string;
-  formato: "pdf" | "texto" | "imagen";
   icon: React.ReactNode;
   label: string;
   disabled: boolean;
@@ -208,15 +235,9 @@ function MenuItem({
   }
 
   return (
-    <a
-      href={`/api/resultado/${orderId}?formato=${formato}&descarga=1`}
-      download
-      role="menuitem"
-      className={itemClass}
-      onClick={onSelect}
-    >
+    <button type="button" role="menuitem" onClick={onSelect} className={itemClass}>
       {icon}
       <span>{label}</span>
-    </a>
+    </button>
   );
 }

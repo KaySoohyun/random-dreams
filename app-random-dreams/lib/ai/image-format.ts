@@ -15,3 +15,16 @@ export function detectImageFormat(bytes: Uint8Array): ImageFormat {
   }
   return "bin";
 }
+
+export function imageFormatToMime(format: ImageFormat): string {
+  if (format === "png") return "image/png";
+  if (format === "jpg") return "image/jpeg";
+  return "application/octet-stream";
+}
+
+export function imageBytesToDataUrl(bytes: Uint8Array): string {
+  const format = detectImageFormat(bytes);
+  const mime = imageFormatToMime(format);
+  const base64 = Buffer.from(bytes).toString("base64");
+  return `data:${mime};base64,${base64}`;
+}
