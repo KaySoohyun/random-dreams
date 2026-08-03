@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import type { StoredOrder } from "./orders";
+import type { StoredOrder, StoredResult } from "./orders";
 
 const COOKIE_PREFIX = "rd_order_";
 const MAX_COOKIE_BYTES = 3500;
@@ -19,7 +19,7 @@ function sign(payload: string): string {
   return createHmac("sha256", secret()).update(payload).digest("base64url");
 }
 
-function serializeForCookie(order: StoredOrder): string {
+export function serializeForCookie(order: StoredOrder): string {
   const withoutImage = {
     ...order,
     result: order.result
@@ -35,6 +35,45 @@ function serializeForCookie(order: StoredOrder): string {
     json = JSON.stringify(withoutText);
   }
   return json;
+}
+
+type RawOrder = Omit<StoredOrder, "confirmedAt" | "createdAt" | "updatedAt" | "result"> & {
+  confirmedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  result: (Omit<StoredResult, "startedAt" | "completedAt" | "createdAt" | "updatedAt" | "imageBytes"> & {
+    startedAt: string | null;
+    completedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    imageBytes: null;
+  }) | null;
+};
+
+function toDate(value: string | null): Date | null {
+  return value ? new Date(value) : null;
+}
+
+function toDateStrict(value: string): Date {
+  return new Date(value);
+}
+
+export function deserializeOrder(parsed: RawOrder): StoredOrder {
+  return {
+    ...parsed,
+    confirmedAt: toDate(parsed.confirmedAt),
+    createdAt: toDateStrict(parsed.createdAt),
+    updatedAt: toDateStrict(parsed.updatedAt),
+    result: parsed.result
+      ? {
+          ...parsed.result,
+          startedAt: toDate(parsed.result.startedAt),
+          completedAt: toDate(parsed.result.completedAt),
+          createdAt: toDateStrict(parsed.result.createdAt),
+          updatedAt: toDateStrict(parsed.result.updatedAt)
+        }
+      : null
+  };
 }
 
 export async function setOrderCookie(order: StoredOrder): Promise<void> {
@@ -66,9 +105,9 @@ export async function getOrderFromCookie(id: string): Promise<StoredOrder | null
     const a = Buffer.from(signature, "base64url");
     const b = Buffer.from(expected, "base64url");
     if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
-    const order = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as StoredOrder;
-    if (order.id !== id) return null;
-    return order;
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as RawOrder;
+    if (parsed.id !== id) return null;
+    return deserializeOrder(parsed);
   } catch {
     return null;
   }
