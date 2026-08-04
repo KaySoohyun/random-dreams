@@ -122,7 +122,8 @@ export function DownloadMenu({
   const downloadPdf = async () => {
     if (!textContent) return;
     const { renderResultPdfClient } = await import("@/lib/pdf/client-pdf");
-    const blob = await renderResultPdfClient(textContent);
+    const logo = await fetchLogoDataUri();
+    const blob = await renderResultPdfClient(textContent, logo);
     triggerDownload(blob, `${fileNameBase}.pdf`);
     setOpen(false);
     notifyDownload(`${fileNameBase}.pdf`);
@@ -207,6 +208,18 @@ function triggerDownload(blob: Blob, fileName: string) {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
+}
+
+async function fetchLogoDataUri(): Promise<string | undefined> {
+  try {
+    const response = await fetch("/assets/logo_pdf.png");
+    if (!response.ok) return undefined;
+    const buffer = await response.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    return `data:image/png;base64,${base64}`;
+  } catch {
+    return undefined;
+  }
 }
 
 function MenuItem({
