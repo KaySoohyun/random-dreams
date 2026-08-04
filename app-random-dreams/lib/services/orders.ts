@@ -34,7 +34,44 @@ export async function createPendingOrder({
 async function hydrateFromCookie(id: string): Promise<void> {
   if (getOrderByIdInStore(id)) return;
   const fromCookie = await getOrderFromCookie(id);
-  if (fromCookie) hydrateStoredOrder(fromCookie);
+  if (fromCookie) {
+    hydrateStoredOrder(fromCookie);
+    return;
+  }
+  await hydrateFromDb(id);
+}
+
+async function hydrateFromDb(id: string): Promise<void> {
+  try {
+    const { prisma } = await import("@/lib/db/prisma");
+    const row = await prisma.generatedResult.findUnique({
+      where: { orderId: id },
+      include: { product: true }
+    });
+    if (!row) return;
+    hydrateStoredOrder({
+      id: row.orderId,
+      productId: row.productId,
+      paymentStatus: "APPROVED",
+      confirmedAt: row.completedAt,
+      formData: null,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      result: {
+        aiResponseStatus: row.aiResponseStatus,
+        textContent: row.textContent,
+        imageBytes: row.imageBytes ? new Uint8Array(row.imageBytes) : null,
+        error: row.error,
+        retryCount: row.retryCount,
+        startedAt: row.startedAt,
+        completedAt: row.completedAt,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt
+      }
+    });
+  } catch {
+    // Sin base de datos disponible: se ignora.
+  }
 }
 
 export async function getOrderById(id: string) {

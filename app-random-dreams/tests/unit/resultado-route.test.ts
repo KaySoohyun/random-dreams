@@ -10,6 +10,10 @@ vi.mock("@/lib/pdf/markdown-pdf", () => ({
   renderResultPdf: vi.fn()
 }));
 
+vi.mock("@/lib/services/orders", () => ({
+  getOrderForGeneration: vi.fn().mockResolvedValue(null)
+}));
+
 import { GET } from "@/app/api/resultado/[orderId]/route";
 import { getResultFile, getResultFileName, getResultText } from "@/lib/services/generation";
 import { renderResultPdf } from "@/lib/pdf/markdown-pdf";

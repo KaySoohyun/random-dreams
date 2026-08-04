@@ -94,12 +94,12 @@ describe("generation service", () => {
     expect(logs[1]).toMatchObject({ step: "GENERATE_TEXT", status: "SUCCESS", error: null, durationMs: 5 });
   });
 
-  it("retryGeneration resetea a QUEUED e incrementa retryCount solo desde ERROR", () => {
+  it("retryGeneration resetea a QUEUED e incrementa retryCount solo desde ERROR", async () => {
     const { id } = seedOrder();
     setResultStatus(id, { aiResponseStatus: "ERROR", error: "boom", textContent: null });
 
     saveText(id, "texto viejo");
-    const result = retryGeneration(id);
+    const result = await retryGeneration(id);
     expect(result).not.toBeNull();
     const stored = getOrderForGenerationInStore(id)?.generatedResult;
     expect(stored?.aiResponseStatus).toBe("QUEUED");
@@ -109,13 +109,13 @@ describe("generation service", () => {
     expect(stored?.retryCount).toBe(1);
   });
 
-  it("retryGeneration no-op desde COMPLETED o si el resultado no existe", () => {
+  it("retryGeneration no-op desde COMPLETED o si el resultado no existe", async () => {
     const { id } = seedOrder();
     setResultStatus(id, { aiResponseStatus: "COMPLETED" });
-    expect(retryGeneration(id)).toBeNull();
+    await expect(retryGeneration(id)).resolves.toBeNull();
 
     const other = seedOrder();
-    expect(retryGeneration(other.id)).toBeNull();
+    await expect(retryGeneration(other.id)).resolves.toBeNull();
   });
 
   it("getResultFile devuelve el texto con nombre derivado y content-type text/plain", () => {

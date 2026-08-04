@@ -111,8 +111,8 @@ export default async function GenerationPage({
         ) : (
           <>
             <p className="text-sm text-muted mt-5">
-              Estamos generando tu texto e imagen. Suele tardar unos segundos: no cierres esta
-              página.
+              Espera unos segundos hasta que ocurra la magía. No cierres la página o tu pedido será
+              triturado.
             </p>
             <div className="mt-6 flex items-center gap-3">
               <Spinner size="md" className="text-primary" label={statusLabel[status] ?? status} />

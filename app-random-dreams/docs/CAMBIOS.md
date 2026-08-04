@@ -2,6 +2,21 @@
 
 Registro de cambios relevantes. Último primero.
 
+## 2026-08-04 — Resultados persistidos en la DB (texto e imagen) al completar
+
+**Motivo:** los archivos PDF, TXT e imagen se exportaban desde los bytes cacheados solo en memoria (`Map` de la feature 017). En instancias serverless frías (o distintas) ese `Map` está vacío y el endpoint `/api/resultado` devolvía `{ error: "Resultado no encontrado" }` (JSON 404). La cookie no alcanza: no lleva `imageBytes` y solo texto corto.
+
+**Qué cambió:**
+
+- `lib/services/generation.ts`: `markCompleted` ahora es `async` y, al completar, persiste el resultado en la DB (`persistResultToDb`): `upsert` de un `Order` mínimo (solo `id` + `productId`, **sin formulario**) y del `GeneratedResult` con `textContent`, `imageBytes`, estado y fechas. `retryGeneration` borra esa fila al reintentar (`removeResultFromDb`) para que el resultado viejo no quede en la DB. La persistencia es *best-effort* (lazy import de prisma + try/catch): si la DB falla, memoria + cookie siguen sirviendo.
+- `lib/services/orders.ts`: la hidratación ahora tiene **fallback a DB**: si no hay pedido en memoria ni en cookie, `hydrateFromDb` carga `GeneratedResult` (incluye producto) y reconstruye el pedido en el store (sin `formData`, ya que no se persiste). Aplica a `getOrderById`, `getCheckoutOrder`, `getOrderGeneration`, `getOrderForGeneration` y `confirmOrder`.
+- `app/api/resultado/[orderId]/route.ts`: llama `getOrderForGeneration` antes de leer resultados, para que la API hidrate desde cookie/DB y deje de devolver 404 "no existe en memoria" en cold start.
+- Tests: `tests/unit/resultado-route.test.ts` mockea `@/lib/services/orders`; `tests/unit/generation-service.test.ts` espera las funciones `async`.
+
+150 tests pasando, lint OK, build OK.
+
+**Alcance:** no se guarda el formulario ni el pedido antes de tener resultados; la fila `Order` mínima existe solo para satisfacer la FK de `GeneratedResult`.
+
 ## 2026-08-03 — Descarga de resultados 100% client-side (sin API JSON)
 
 **Motivo:** la descarga de resultados abría `/api/resultado/[orderId]`, que devolvía `{ error: "Resultado no encontrado" }` (JSON 404) cuando el request caía en una instancia serverless fría sin el resultado en memoria. El navegador lo descargaba como archivo `.json`. La generación no usa BD (feature 017), así que el resultado vive solo en la instancia que lo generó.

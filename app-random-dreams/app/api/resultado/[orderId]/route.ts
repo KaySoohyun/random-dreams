@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getResultFile, getResultFileName, getResultText } from "@/lib/services/generation";
+import { getOrderForGeneration } from "@/lib/services/orders";
 import { renderResultPdf } from "@/lib/pdf/markdown-pdf";
 
 export const runtime = "nodejs";
@@ -12,6 +13,8 @@ export async function GET(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   const { orderId } = await params;
+
+  await getOrderForGeneration(orderId);
 
   let formato: z.infer<typeof formatoSchema>;
   let descarga = false;

@@ -10,6 +10,7 @@ import {
   type PipelineStepStatus,
   type StoredResult
 } from "@/lib/store/orders";
+import type { AiResponseStatus } from "@/lib/generated/prisma/client";
 import { detectImageFormat } from "@/lib/ai/image-format";
 
 export function getOrderForGeneration(orderId: string) {
@@ -34,16 +35,19 @@ export function saveImage(orderId: string, imageBytes: Uint8Array): void {
   saveResultImage(orderId, imageBytes);
 }
 
-export function markCompleted(orderId: string): void {
+export async function markCompleted(orderId: string): Promise<void> {
   setResultStatus(orderId, { aiResponseStatus: "COMPLETED", completedAt: new Date() });
+  await persistResultToDb(orderId);
 }
 
 export function markError(orderId: string, message: string): void {
   setResultStatus(orderId, { aiResponseStatus: "ERROR", error: message });
 }
 
-export function retryGeneration(orderId: string): StoredResult | null {
-  return resetResultForRetry(orderId);
+export async function retryGeneration(orderId: string): Promise<StoredResult | null> {
+  const result = resetResultForRetry(orderId);
+  if (result) await removeResultFromDb(orderId);
+  return result;
 }
 
 export function getResultText(orderId: string): string | null {
@@ -171,4 +175,63 @@ export function logStep(
   options?: { payload?: unknown; error?: string; durationMs?: number }
 ): void {
   logStepInStore(orderId, step, status, options);
+}
+
+async function persistResultToDb(orderId: string): Promise<void> {
+  try {
+    const order = getOrderForGenerationInStore(orderId);
+    const result = order?.generatedResult;
+    if (!order || !result) return;
+
+    const { prisma } = await import("@/lib/db/prisma");
+    await prisma.$transaction([
+      prisma.order.upsert({
+        where: { id: orderId },
+        create: { id: orderId, productId: order.productId, paymentStatus: "APPROVED" },
+        update: {}
+      }),
+      prisma.generatedResult.upsert({
+        where: { orderId },
+        create: {
+          orderId,
+          productId: order.productId,
+          aiRequestPayload: {},
+          aiResponseStatus: result.aiResponseStatus as AiResponseStatus,
+          textContent: result.textContent,
+          imageBytes: result.imageBytes ? new Uint8Array(result.imageBytes) : null,
+          error: result.error,
+          retryCount: result.retryCount,
+          startedAt: result.startedAt,
+          completedAt: result.completedAt,
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt
+        },
+        update: {
+          productId: order.productId,
+          aiResponseStatus: result.aiResponseStatus as AiResponseStatus,
+          textContent: result.textContent,
+          imageBytes: result.imageBytes ? new Uint8Array(result.imageBytes) : null,
+          error: result.error,
+          retryCount: result.retryCount,
+          startedAt: result.startedAt,
+          completedAt: result.completedAt,
+          updatedAt: result.updatedAt
+        }
+      })
+    ]);
+  } catch {
+    // Best-effort: si la persistencia falla, memoria + cookie siguen sirviendo.
+  }
+}
+
+async function removeResultFromDb(orderId: string): Promise<void> {
+  try {
+    const { prisma } = await import("@/lib/db/prisma");
+    await prisma.$transaction([
+      prisma.generatedResult.deleteMany({ where: { orderId } }),
+      prisma.order.deleteMany({ where: { id: orderId } })
+    ]);
+  } catch {
+    // Best-effort.
+  }
 }
